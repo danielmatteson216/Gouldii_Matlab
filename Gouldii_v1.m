@@ -22,7 +22,7 @@ function varargout = Gouldii_v1(varargin)
 
 % Edit the above text to modify the response to help Gouldii_v1
 
-% Last Modified by GUIDE v2.5 25-Jun-2018 11:40:07
+% Last Modified by GUIDE v2.5 25-Jun-2018 21:34:06
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -66,7 +66,8 @@ set(handles.Input_ContangoEntry, 'enable', 'off')
 set(handles.Input_opt2numofsteps, 'enable', 'off')
 set(handles.Input_opt2lowerbound, 'enable', 'off')
 set(handles.Input_opt2upperbound, 'enable', 'off')
-
+set(handles.edit_wfaperiod, 'enable', 'off')
+set(handles.edit_wfasample, 'enable', 'off')
 filename = 'load(''db_tradedate.mat'')';
 evalin('base',filename);
 
@@ -1238,3 +1239,74 @@ function createstrategy_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 run('Gouldii_CreateNewStrategy.m');
 
+
+
+
+function edit_wfaperiod_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_wfaperiod (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_wfaperiod as text
+%        str2double(get(hObject,'String')) returns contents of edit_wfaperiod as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_wfaperiod_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_wfaperiod (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+
+% --- Executes on button press in checkbox_wfa.
+function checkbox_wfa_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_wfa (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_wfa
+
+ischecked = get(hObject,'Value');
+
+if ischecked == 1
+set(handles.edit_wfaperiod, 'enable', 'on')
+set(handles.edit_wfasample, 'enable', 'on') 
+elseif ischecked == 0
+set(handles.edit_wfaperiod, 'enable', 'off')
+set(handles.edit_wfasample, 'enable', 'off')   
+    
+end    
+
+
+
+
+
+
+function edit_wfasample_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_wfasample (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_wfasample as text
+%        str2double(get(hObject,'String')) returns contents of edit_wfasample as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_wfasample_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_wfasample (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
