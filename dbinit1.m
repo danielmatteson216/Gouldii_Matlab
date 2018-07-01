@@ -135,8 +135,6 @@ CONTANGO30 = CONTANGO30_CLOSE;
            if T1(i,1) < 2
            TargetWeightVX1_S30(i,1) = 0.00;
            end
-                
-           TargetWeightVX1_S30(i, 1) = TargetWeightVX1_S30(i, 1);
            
            TargetWeightVX2_S30(i,1) = (1 - TargetWeightVX1_S30(i,1));   
     end           

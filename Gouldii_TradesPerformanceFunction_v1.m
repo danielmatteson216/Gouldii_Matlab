@@ -5,6 +5,7 @@ nr = Serial_enddate - Serial_startdate+1;
 nc = 1;
 
 %size dataset for evaluation to the trading period
+SERIAL_DATE_DATA = SERIAL_DATE_DATA(Serial_startdate:Serial_enddate);
 TargetWeightVX1_S30 = TargetWeightVX1_S30(Serial_startdate:Serial_enddate);
 TargetWeightVX2_S30 = TargetWeightVX2_S30(Serial_startdate:Serial_enddate);
 T1 = T1(Serial_startdate:Serial_enddate, :);
@@ -115,7 +116,8 @@ stoplosscount =  0;
 IsExpDate = ismember(TradeDate, ExpDates);
 
 
-       
+
+      
       
      
 % xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx     

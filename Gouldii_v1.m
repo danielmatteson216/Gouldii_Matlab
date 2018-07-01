@@ -75,6 +75,7 @@ evalin('base',filename);
 
 
 
+
 % --- Outputs from this function are returned to the command line.
 function varargout = Gouldii_v1_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
@@ -976,18 +977,21 @@ opt2numofsteps = str2num(opt2numofsteps);
 opt2lowerbound = str2num(opt2lowerbound);
 opt2upperbound = str2num(opt2upperbound);
 
+
+
 % the following is used to prevent opt 1 from being 0 (coincides with our
 % strategy prime 
 if opt1lowerbound == 0 && opt1upperbound == 0
 opt1lowerbound = 0.08;
 set(handles.Input_opt1lowerbound, 'String',opt1lowerbound);
 end
+% the above should be changed and more logic applied
+
+
+
 
 %----------------------------------------------------
 % deal with the dates!!!
-
-
-
 
          startdate_string = get(handles.Input_StartDate,'String');
          enddate_string = get(handles.Input_EndDate,'String');
@@ -996,9 +1000,8 @@ end
 try
 TradeDate = evalin('base','TradeDate');         
 catch
-    
+load('db_tradedate.mat');  
 end   
-
 
 
 db_startdate = TradeDate(1);
@@ -1007,7 +1010,7 @@ db_enddate = TradeDate(end);
 db_startdate = datestr(datetime(db_startdate, 'Format', 'MM/dd/yyyy'),'mm/dd/yyyy');
 db_enddate = datestr(datetime(db_enddate, 'Format', 'MM/dd/yyyy'),'mm/dd/yyyy');
 
-         if strcmp (startdate_string, 'MM/DD/YYYY') || strcmp (enddate_string , 'MM/DD/YYYY')
+         if strcmp (startdate_string, 'MM/DD/YYYY') || strcmp (enddate_string , 'MM/DD/YYYY') || isempty(startdate_string) || isempty(enddate_string)
              set(handles.status_GUI,'String',status_error);
              warning('you must enter a valid trading date in the correct format. Check to ensure that the date entered is not a weekend or holiday'); 
              pause(2)
@@ -1018,23 +1021,40 @@ db_enddate = datestr(datetime(db_enddate, 'Format', 'MM/dd/yyyy'),'mm/dd/yyyy');
              clc
              set(handles.OutputTextBox,'String', '');
              set(handles.status_GUI,'String',status_start);
+             startdate_string = db_startdate;
+             enddate_string = db_enddate;
              %drawnow;
          %return;
          end
+            
+         %check if Db startdate is same as startdatestring(from GUI) if so,
+         %then we must initialize the yesterdays variables, else, if they
+         %are different, we set yesterdays variables equal to the values
+         %from the previous trading day.
+         %*********************************************
+if strcmp(db_startdate,startdate_string)         
+isfirstday = 1;
+else
+isfirstday = 0;
+end
+         %**********************************************
          
-         Serial_startdate_actual = datenum(db_startdate,'mm/dd/yyyy');
-         Serial_enddate_actual = datenum(db_enddate,'mm/dd/yyyy');
          
-         datecheck = 1; beginningdate = db_startdate; finaldate = db_enddate;
+         Serial_startdate_actual = datenum(startdate_string,'mm/dd/yyyy');
+         Serial_enddate_actual = datenum(enddate_string,'mm/dd/yyyy');
          
-         if Serial_startdate_actual < datenum(beginningdate,'mm/dd/yyyy');
+         datecheck = 1; 
+         %beginningdate = db_startdate; 
+         %finaldate = db_enddate;
+         
+         if Serial_startdate_actual < datenum(db_startdate,'mm/dd/yyyy');
          datecheck = 0;
          end
-         if Serial_enddate_actual > datenum(finaldate,'mm/dd/yyyy');
+         if Serial_enddate_actual > datenum(db_enddate,'mm/dd/yyyy');
          datecheck = 0;
          end
          
-        ProperDates = isbusday(db_startdate) && isbusday(db_enddate) && datecheck == 1 ;
+        ProperDates = isbusday(Serial_startdate_actual) && isbusday(Serial_enddate_actual) && datecheck == 1 ;
 
           if ProperDates == 0
              set(handles.status_GUI,'String',status_error);
@@ -1112,16 +1132,26 @@ set(handles.status_GUI,'String',status_strategyrun);
 drawnow;
 
 
+% IN LOOP FOR WFA, we must check the value of the previous signal variable
+% sigprevious. It should be inside the loop at the very end so the next
+% date range inputs its value into the LO code.
 
-
+%have to figure out how to set this correctly:
+try
+sigprevious = evalin('base','sigprevious'); 
+catch
+sigprevious = 0;
+disp('error while trying to evalin sigprevious, set to 0, investigate if this is okay.?.!?.');
+end
 
 %call the LO code here
 
 try
-[OptContangoEntry,OptContango30Entry,OptContangoExit,OptContango30Exit,OptLongContangoEntry,OptLongContango30Entry,OptMaxDD,OptNetProfit,OptSharpeRatio,OptAnnualizedReturn] = Gouldii_SignalsLinearOptimizer_v1(StrategyPath, SelectedStrategy, Commission, initialportfolio, StopLoss,Serial_startdate_actual,Serial_enddate_actual,OptimizedParameter1String,opt1numofsteps,opt1lowerbound,opt1upperbound,OptimizedParameter2String,opt2numofsteps,opt2lowerbound,opt2upperbound,ContangoEntry,Contango30Entry,ContangoExit,Contango30Exit,LongContangoEntry,LongContango30Entry);
+ [sigprevious,OptContangoEntry,OptContango30Entry,OptContangoExit,OptContango30Exit,OptLongContangoEntry,OptLongContango30Entry,OptMaxDD,OptNetProfit,OptSharpeRatio,OptAnnualizedReturn,isfirstday] = Gouldii_SignalsLinearOptimizer_v1(StrategyPath, SelectedStrategy, Commission, initialportfolio, StopLoss,Serial_startdate_actual,Serial_enddate_actual,OptimizedParameter1String,opt1numofsteps,opt1lowerbound,opt1upperbound,OptimizedParameter2String,opt2numofsteps,opt2lowerbound,opt2upperbound,ContangoEntry,Contango30Entry,ContangoExit,Contango30Exit,LongContangoEntry,LongContango30Entry,isfirstday,startdate_string,sigprevious);
 
-
-
+disp('The final trading day signal from previous run:');
+disp(sigprevious)
+assignin('base','sigprevious',sigprevious);
 
             set(handles.Input_ContangoEntry, 'String', OptContangoEntry) 
             set(handles.Input_Contango30Entry, 'String', OptContango30Entry)         
@@ -1165,7 +1195,7 @@ set(handles.PreviousTextbox,'String', previousrun);
 
 set(handles.OutputTextBox,'String', outputstring)             
             
-            %set(handles.input_Contango30Entry, 'string', '0.10') 
+          
 set(handles.status_GUI,'String',status_end);
 pause(5)
 set(handles.status_GUI,'String',status_start);
@@ -1284,7 +1314,7 @@ set(handles.edit_wfaperiod, 'enable', 'off')
 set(handles.edit_wfasample, 'enable', 'off')   
     
 end    
-
+assignin('base','isWFA',ischecked);
 
 
 
