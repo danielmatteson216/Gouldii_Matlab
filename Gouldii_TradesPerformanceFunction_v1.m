@@ -333,15 +333,15 @@ nexttradeday = weekday(busdate(SERIAL_DATE_DATA(i),1));
                                     
 
                                     if TradeVX1Contracts(i,1) <= 0
-                                       TradeVX1Actual(i,1) = ((VX1_close(i) - .035) * 1000 * TradeVX1Contracts(i,1)) + 20*TradeVX1Contracts(i,1);
+                                       TradeVX1Actual(i,1) = ((VX1_close(i) - .035) * 1000 * TradeVX1Contracts(i,1)) + Commission*TradeVX1Contracts(i,1);
                                     elseif TradeVX1Contracts(i,1) > 0
-                                       TradeVX1Actual(i,1) = ((VX1_close(i) + .035) * 1000 * TradeVX1Contracts(i,1)) - 20*TradeVX1Contracts(i,1);
+                                       TradeVX1Actual(i,1) = ((VX1_close(i) + .035) * 1000 * TradeVX1Contracts(i,1)) - Commission*TradeVX1Contracts(i,1);
                                    end 
                                     
                                     if TradeVX2Contracts(i,1) <= 0
-                                       TradeVX2Actual(i,1) = ((VX2_close(i) - .035) * 1000 * TradeVX2Contracts(i,1)) + 20*TradeVX2Contracts(i,1);                                        
+                                       TradeVX2Actual(i,1) = ((VX2_close(i) - .035) * 1000 * TradeVX2Contracts(i,1)) + Commission*TradeVX2Contracts(i,1);                                        
                                     elseif TradeVX2Contracts(i,1) > 0
-                                       TradeVX2Actual(i,1) = ((VX2_close(i) + .035) * 1000 * TradeVX2Contracts(i,1)) - 20*TradeVX2Contracts(i,1);                                        
+                                       TradeVX2Actual(i,1) = ((VX2_close(i) + .035) * 1000 * TradeVX2Contracts(i,1)) - Commission*TradeVX2Contracts(i,1);                                        
                                     end 
                                    
                            PortfolioCash(i,1) = (PortfolioCashPre(i,1) - TradeVX1Actual(i,1) - TradeVX2Actual(i,1));    

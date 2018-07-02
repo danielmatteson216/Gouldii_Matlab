@@ -247,7 +247,8 @@ counter = 0;
                 LinearOptResults(j,10) = num2cell(((1+CummROR(1,j))^(365/length(sigw1)))-1);
                 %LinearOptResults(j,10) = num2cell(MaxDDindex(1,j));
 
-
+ LinearOpt2_OUTPUT_CELL_ARRAY(1,counter) = OUTPUT_CELL_ARRAY(1,j);
+ 
         end   %end of INSIDE LINEAR OPT LOOP
 
                  if  strcmp(OptimizedParameter1String,OptimizedParameter2String)
@@ -255,7 +256,7 @@ counter = 0;
                      break;
                  end
 
-                 LinearOpt2_OUTPUT_CELL_ARRAY(m,:) = OUTPUT_CELL_ARRAY(1,:);
+                
                  
                         if m == 1
                             LinearOptTemp = LinearOptResults;
@@ -276,7 +277,8 @@ counter = 0;
     end
 
     MaxDrawdowntotal = horzcat(MaxDD,MaxDDindex);
-    output = OUTPUT_CELL_ARRAY{1};
+    
+
 
     clear('emptycell68','XIVindexstop','TradeDate_cellarray','TradeDate_String','ans','emptycell79','EXCEL_ALGO_SIGNAL','DVT_sigNUM','k','lastrowend','lengthofsignals','output_file_ToadCentral','p','y','AVCI','SERIAL_DATE_LEN','VCO_direction','VTRO','VTRO_direction','VTRO_int','VXST_ROLL','VXV_ROLL','i','j')
 
@@ -296,6 +298,10 @@ counter = 0;
     [MaxAnnualizedReturn,MaxAnnualizedReturnIndex] = max(cell2mat(LinearOptimizerResults(1:end,10)))
     %-----------------------------------
 
+    %this should identify which output array is the optimal output array
+    output = LinearOpt2_OUTPUT_CELL_ARRAY{MaxSharpeIndex};    
+    
+    
 
     OptContangoEntry = LinearOptimizerResults{MaxSharpeIndex,1};
     OptContango30Entry = LinearOptimizerResults{MaxSharpeIndex,2};
@@ -317,27 +323,27 @@ counter = 0;
 
 stratpath = 'C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\';
 strategypath = strcat(stratpath, SelectedStrategy_temp, '\');
-
+strategypath_output = strcat(strategypath,'OptResultsOutputArray.xlsx');
+strategypath_complete = strcat(strategypath,'COMPLETE_OUTPUT_ARRAY.xlsx');
+strategypath_maxdd = strcat(strategypath,'MaxDrawdowntotal.xlsx');
+strategypath_linearopt = strcat(strategypath,'LinearOptResults.xlsx');
         try
-            strategypath_output = strcat(strategypath,'OptResultsOutputArray.xlsx');
-            xlswrite(strategypath_output,finaloutput);
-            strategypath_complete = strcat(strategypath,'COMPLETE_OUTPUT_ARRAY.xlsx');            
-            xlswrite(strategypath_complete,output); 
-            strategypath_maxdd = strcat(strategypath,'MaxDrawdowntotal.xlsx');                
-            xlswrite(strategypath_maxdd,MaxDrawdowntotal);
-            strategypath_linearopt = strcat(strategypath,'LinearOptResults.xlsx');             
+            xlswrite(strategypath_output,output);      
+            xlswrite(strategypath_complete,output);                
+            xlswrite(strategypath_maxdd,MaxDrawdowntotal);            
             xlswrite(strategypath_linearopt,TotalLinearOpt);
         catch
-            
+            try
             system('taskkill /F /IM EXCEL.EXE');
+            catch
+            end
 
-            strategypath_output = strcat(strategypath,'OptResultsOutputArray.xlsx');
-            xlswrite(strategypath_output,finaloutput);
-            strategypath_complete = strcat(strategypath,'COMPLETE_OUTPUT_ARRAY.xlsx');            
+            %check to see if the directory exists, if not, create it.
+            % we will need another try catch
+            
+            xlswrite(strategypath_output,output);
             xlswrite(strategypath_complete,output); 
-            strategypath_maxdd = strcat(strategypath,'MaxDrawdowntotal.xlsx');                
             xlswrite(strategypath_maxdd,MaxDrawdowntotal);
-            strategypath_linearopt = strcat(strategypath,'LinearOptResults.xlsx');             
             xlswrite(strategypath_linearopt,TotalLinearOpt);
         end    
 
@@ -406,11 +412,12 @@ strategypath = strcat(stratpath, SelectedStrategy_temp, '\');
     
     
     
-   
+
 
     % --------       GRAPHS N' SHIT    --------------------------------------
     % ------------------------------------------------------------------------------
-    
+    try
+        
     load('Volatility_BuyAndHold.mat');
     NetLiqTotalBuyAndHold_Returns = tick2ret(NetLiqTotalBuyAndHold);
     %NetLiqTotalBuyAndHold_Returns = NetLiqTotalBuyAndHold_Returns(Serial_startdate:Serial_enddate, :);
@@ -426,6 +433,9 @@ strategypath = strcat(stratpath, SelectedStrategy_temp, '\');
     hold on                                                            %COMMENT -axis([FromDate ToDate])
     set(gca,'YScale','log')
 
+    catch
+       disp('ERROR IN GRAPH CODE, likely did NOT run BuyandHold after changing dates'); 
+    end    
     %figure(101)
 
     %plot(TradeDates,CONTANGO)
