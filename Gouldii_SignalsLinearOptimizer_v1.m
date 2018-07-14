@@ -175,14 +175,14 @@ counter = 0;
 
     %----------------------------------------------------------------------------------------------------------------------    
 
-    
+   disp('if there is an error, it happens either in the strategy or later'); 
 
   %=======================================================================
   %   ===============        CALL STRATEGY       ===================
   %=======================================================================
                 [sigprevious,sigw1,sigw2,ticker1,ticker2] = feval(SelectedStrategy_input,Serial_startdate,Serial_enddate,CONTANGO,CONTANGO30,y_CONTANGO,y_CONTANGO30,y_sig,...
                                                                   ContangoEntry,Contango30Entry,ContangoExit,Contango30Exit,LongContangoEntry,LongContango30Entry,...
-                                                                  TargetWeightVX1_S30,TargetWeightVX2_S30,curve_tickers);
+                                                                  TargetWeightVX1_S30,TargetWeightVX2_S30,TargetWeightVX1_S45,TargetWeightVX2_S45,curve_tickers);
  
 
 
@@ -275,8 +275,8 @@ counter = 0;
     elseif NetLiqTotalempty == 1
     disp('Net Liq is positive');
     end
-
     MaxDrawdowntotal = horzcat(MaxDD,MaxDDindex);
+
     
 
 
@@ -323,26 +323,43 @@ counter = 0;
 
 stratpath = 'C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\';
 strategypath = strcat(stratpath, SelectedStrategy_temp, '\');
-strategypath_output = strcat(strategypath,'OptResultsOutputArray.xlsx');
-strategypath_complete = strcat(strategypath,'COMPLETE_OUTPUT_ARRAY.xlsx');
-strategypath_maxdd = strcat(strategypath,'MaxDrawdowntotal.xlsx');
-strategypath_linearopt = strcat(strategypath,'LinearOptResults.xlsx');
+strategypathResults = strcat(strategypath,'Results\');
+strategypathOptParams = strcat(strategypath,'OptParams\');
+
+now = datetime('now','Format','yyyyMMdd_HHmmss');
+now = datestr(now,'yyyymmdd_HHMMss');
+sdate = datestr(Serial_startdate_actual,'yyyymmdd');
+edate = datestr(Serial_enddate_actual,'yyyymmdd');
+
+strategypath_output = strcat(strategypathResults,sdate,'_',edate,'_');
+strategypath_output = strcat(strategypath_output,'OptResultsOutputArray_',now,'.xlsx');
+
+%strategypath_complete = strcat(strategypathResults,sdate,'_',edate,'_');
+%strategypath_complete = strcat(strategypath_complete,'COMPLETE_OUTPUT_ARRAY_',now,'.xlsx');
+
+strategypath_maxdd = strcat(strategypathResults,sdate,'_',edate,'_');
+strategypath_maxdd = strcat(strategypath_maxdd,'MaxDrawdowntotal_',now,'.xlsx');
+
+strategypath_linearopt = strcat(strategypathOptParams,sdate,'_',edate,'_');
+strategypath_linearopt = strcat(strategypath_linearopt,'LinearOptResults_',now,'.xlsx');
+
         try
             xlswrite(strategypath_output,output);      
-            xlswrite(strategypath_complete,output);                
+            %xlswrite(strategypath_complete,output);                
             xlswrite(strategypath_maxdd,MaxDrawdowntotal);            
             xlswrite(strategypath_linearopt,TotalLinearOpt);
         catch
             try
             system('taskkill /F /IM EXCEL.EXE');
             catch
+                disp('no excel open error')
             end
 
             %check to see if the directory exists, if not, create it.
             % we will need another try catch
             
             xlswrite(strategypath_output,output);
-            xlswrite(strategypath_complete,output); 
+            %xlswrite(strategypath_complete,output); 
             xlswrite(strategypath_maxdd,MaxDrawdowntotal);
             xlswrite(strategypath_linearopt,TotalLinearOpt);
         end    

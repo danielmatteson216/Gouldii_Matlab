@@ -106,20 +106,31 @@ CONTANGO_low(:,2) = num2cell(CONTANGO_LOW(:,1));
 
 VIX = cell2mat(vix(:,7));
 
+%ma50d = tsmovavg(VIX,'s',50,1)
 
 %set contango
 CONTANGO = CONTANGO_CLOSE;
 
+
 %TimeToExpiryDiff
 TDiff = T2 - T1;
-TDiffnumer = T2 - 30;
-TDiffCo = TDiffnumer./TDiff;
+TDiffnumer30 = T2 - 30;
+TDiffCo30 = TDiffnumer30./TDiff;
 %calculate synthetic 30 day...
-S30VX = (TDiffCo.*VX1_close) + ((1 - TDiffCo).*VX2_close);
+S30VX = (TDiffCo30.*VX1_close) + ((1 - TDiffCo30).*VX2_close);
+ 
+TDiffnumer45 = T2 - 45;
+TDiffCo45 = TDiffnumer45./TDiff;
+%calculate synthetic 45 day...
+S45VX = (TDiffCo45.*VX1_close) + ((1 - TDiffCo45).*VX2_close);
 
 CONTANGO30_CLOSE = ((S30VX./VIX)- 1);
 
+CONTANGO45_CLOSE = ((S45VX./VIX)- 1);
+
 CONTANGO30 = CONTANGO30_CLOSE;
+
+CONTANGO45 = CONTANGO45_CLOSE;
 
     for i = 1:numel(SERIAL_DATE_DATA)
            TargetWeightVX1_S30(i, 1) = ((T2(i,1)-30)./(T2(i,1)-T1(i,1)));
@@ -136,8 +147,21 @@ CONTANGO30 = CONTANGO30_CLOSE;
            TargetWeightVX1_S30(i,1) = 0.00;
            end
            
-           TargetWeightVX2_S30(i,1) = (1 - TargetWeightVX1_S30(i,1));   
-    end           
+           TargetWeightVX2_S30(i,1) = (1 - TargetWeightVX1_S30(i,1));  %this is why 45 day didnt work  
+    end     
+    
+    
+    for i = 1:numel(SERIAL_DATE_DATA)
+        
+           if T2(i,1) <= 45
+           TargetWeightVX2_S45(i,1) = T2(i,1)./45;
+           TargetWeightVX1_S45(i,1) = 0.0;
+           end
+        
+        TargetWeightVX1_S45(i, 1) = ((T2(i,1)-45)./(T2(i,1)-T1(i,1)));
+
+           TargetWeightVX2_S45(i,1) = (1 - TargetWeightVX1_S45(i,1));  %this is why 45 day didnt work  
+    end       
     
     ExpDates = contracts(2:end,2);
 
@@ -151,7 +175,7 @@ TradeDay = weekday(TradeDate);
 
 ROLL_YIELD(:,1) = ((VX1_close./VIX)-1);
 %clear('handles','hObject','eventdata');
-save('db_historicaldata.mat','ROLL_YIELD','CONTANGO','CONTANGO_low','T3','TradeDay','VX2_open','CONTANGO30','CONTANGO_open','TDiff','VIX','VX3_close','CONTANGO30_CLOSE','Date_string','TDiffCo','VX1_close','VX3_high','i','CONTANGO_CLOSE','Date_vector','TDiffnumer','VX1_high','VX3_low','prices','CONTANGO_HIGH','ExpDates','TargetWeightVX1_S30','VX1_low','VX3_open','vix','CONTANGO_LOW','S30VX','TargetWeightVX2_S30','VX1_open','vx1','CONTANGO_OPEN','SERIAL_DATE_DATA','VX2_close','contracts','vx2','CONTANGO_close','T1','TradeDate_NumFormat','VX2_high','curve_tickers','vx3','CONTANGO_high','T2','TradeDate_converted','VX2_low') 
-clear('ROLL_YIELD','CONTANGO','CONTANGO_low','T3','TradeDay','VX2_open','CONTANGO30','CONTANGO_open','TDiff','VIX','VX3_close','CONTANGO30_CLOSE','Date_string','TDiffCo','VX1_close','VX3_high','i','CONTANGO_CLOSE','Date_vector','TDiffnumer','VX1_high','VX3_low','prices','CONTANGO_HIGH','ExpDates','TargetWeightVX1_S30','VX1_low','VX3_open','vix','CONTANGO_LOW','S30VX','TargetWeightVX2_S30','VX1_open','vx1','CONTANGO_OPEN','SERIAL_DATE_DATA','VX2_close','contracts','vx2','CONTANGO_close','T1','TradeDate_NumFormat','VX2_high','curve_tickers','vx3','CONTANGO_high','T2','TradeDate_converted','VX2_low');
+save('db_historicaldata.mat','ROLL_YIELD','CONTANGO','CONTANGO_low','T3','TradeDay','VX2_open','CONTANGO30','CONTANGO45','CONTANGO_open','TDiff','VIX','VX3_close','CONTANGO30_CLOSE','Date_string','TDiffCo30','TDiffCo45','VX1_close','VX3_high','i','CONTANGO_CLOSE','Date_vector','VX1_high','VX3_low','prices','CONTANGO_HIGH','ExpDates','TargetWeightVX1_S30','TargetWeightVX2_S45','TargetWeightVX1_S45','VX1_low','VX3_open','vix','CONTANGO_LOW','S30VX','TargetWeightVX2_S30','VX1_open','vx1','CONTANGO_OPEN','SERIAL_DATE_DATA','VX2_close','contracts','vx2','CONTANGO_close','T1','TradeDate_NumFormat','VX2_high','curve_tickers','vx3','CONTANGO_high','T2','TradeDate_converted','VX2_low') 
+clear('ROLL_YIELD','CONTANGO','CONTANGO_low','T3','TradeDay','VX2_open','CONTANGO30','CONTANGO_open','TDiff','VIX','VX3_close','CONTANGO30_CLOSE','Date_string','TDiffCo30','VX1_close','VX3_high','i','CONTANGO_CLOSE','Date_vector','TDiffnumer','VX1_high','VX3_low','prices','CONTANGO_HIGH','ExpDates','TargetWeightVX1_S30','VX1_low','VX3_open','vix','CONTANGO_LOW','S30VX','TargetWeightVX2_S30','VX1_open','vx1','CONTANGO_OPEN','SERIAL_DATE_DATA','VX2_close','contracts','vx2','CONTANGO_close','T1','TradeDate_NumFormat','VX2_high','curve_tickers','vx3','CONTANGO_high','T2','TradeDate_converted','VX2_low');
 save('db_tradedate.mat', 'TradeDate') 
 

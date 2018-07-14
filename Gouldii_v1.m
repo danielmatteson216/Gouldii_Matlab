@@ -144,7 +144,9 @@ handles = guidata(hObject);
 handles.in_opt1lowerbound = get(hObject,'String');
 %temp_input = handles.in_opt1lowerbound;
 input_lower1 = get(handles.Input_opt1lowerbound, 'String');
+drawnow;
 input_upper1 = get(handles.Input_opt1upperbound, 'String');
+drawnow;
 input_lower1 = str2double(input_lower1);
 input_upper1 = str2double(input_upper1);
 if input_lower1 > input_upper1
@@ -156,6 +158,7 @@ end
 
 guidata(hObject, handles);
 set(hObject, 'Enable', 'Inactive');
+drawnow;
 
 % --- Executes during object creation, after setting all properties.
 function Input_opt1lowerbound_CreateFcn(hObject, eventdata, handles)
@@ -190,6 +193,7 @@ function Input_opt1lowerbound_ButtonDownFcn(hObject, eventdata, handles)
 %uicontrol(handles.Input_opt1lowerbound);
 guidata(hObject, handles);
 handles.temp_opt1lowerbound = get(handles.Input_opt1lowerbound,'String');
+drawnow;
 %temp_input = handles.temp_opt1lowerbound;
 guidata(hObject, handles);
 set(hObject, 'Enable', 'on');
@@ -212,7 +216,9 @@ handles = guidata(hObject);
 handles.in_opt1upperound = get(hObject,'String');
 %temp_input = handles.in_opt1upperbound;
 input_lower1 = get(handles.Input_opt1lowerbound, 'String');
+drawnow;
 input_upper1 = get(handles.Input_opt1upperbound, 'String');
+drawnow;
 input_lower1 = str2double(input_lower1);
 input_upper1 = str2double(input_upper1);
 if input_upper1 < input_lower1
@@ -224,6 +230,7 @@ end
 
 guidata(hObject, handles);
 set(hObject, 'Enable', 'Inactive');
+drawnow;
 
 % --- Executes during object creation, after setting all properties.
 function Input_opt1upperbound_CreateFcn(hObject, eventdata, handles)
@@ -246,6 +253,7 @@ function Input_opt1upperbound_ButtonDownFcn(hObject, eventdata, handles)
 %set(hObject, 'Enable', 'Inactive');
 guidata(hObject, handles);
 handles.temp_opt1upperbound = get(handles.Input_opt1upperbound,'String');
+drawnow;
 %temp_input = handles.temp_opt1lowerbound;
 guidata(hObject, handles);
 set(hObject, 'Enable', 'on');
@@ -295,7 +303,9 @@ handles = guidata(hObject);
 handles.in_opt2lowerbound = get(hObject,'String');
 %temp_input = handles.in_opt1lowerbound;
 input_lower2 = get(handles.Input_opt2lowerbound, 'String');
+drawnow;
 input_upper2 = get(handles.Input_opt2upperbound, 'String');
+drawnow;
 input_lower2 = str2double(input_lower2);
 input_upper2 = str2double(input_upper2);
 if input_lower2 > input_upper2
@@ -308,6 +318,7 @@ end
 guidata(hObject, handles);
 
 set(hObject, 'Enable', 'Inactive');
+drawnow;
 
 % --- Executes during object creation, after setting all properties.
 function Input_opt2lowerbound_CreateFcn(hObject, eventdata, handles)
@@ -329,6 +340,7 @@ function Input_opt2lowerbound_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 guidata(hObject, handles);
 handles.temp_opt2lowerbound = get(handles.Input_opt2lowerbound,'String');
+drawnow;
 %temp_input = handles.temp_opt1lowerbound;
 guidata(hObject, handles);
 set(hObject, 'Enable', 'on');
@@ -350,7 +362,9 @@ handles = guidata(hObject);
 handles.in_opt2upperound = get(hObject,'String');
 %temp_input = handles.in_opt1upperbound;
 input_lower2 = get(handles.Input_opt2lowerbound, 'String');
+drawnow;
 input_upper2 = get(handles.Input_opt2upperbound, 'String');
+drawnow;
 input_lower2 = str2double(input_lower2);
 input_upper2 = str2double(input_upper2);
 if input_upper2 < input_lower2
@@ -362,6 +376,7 @@ end
 
 guidata(hObject, handles);
 set(hObject, 'Enable', 'Inactive');
+drawnow;
 
 % --- Executes during object creation, after setting all properties.
 function Input_opt2upperbound_CreateFcn(hObject, eventdata, handles)
@@ -383,6 +398,7 @@ function Input_opt2upperbound_ButtonDownFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 guidata(hObject, handles);
 handles.temp_opt2upperbound = get(handles.Input_opt2upperbound,'String');
+drawnow;
 %temp_input = handles.temp_opt1lowerbound;
 guidata(hObject, handles);
 set(hObject, 'Enable', 'on');
