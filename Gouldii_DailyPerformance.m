@@ -19,31 +19,33 @@ Dates = datestr(TradeDate);
 Dates = cellstr(Dates);
 
 TimeSeriesObject = fints(Dates, NetLiqT);
-idate = {'31-Dec-2006'};
+idate = {'17-Aug-2007'};
 initial = fints(idate,1000000);
 
-AnnualData = toannual(TimeSeriesObject);
+DailyData = todaily(TimeSeriesObject);
+DailyData = merge(initial,DailyData);
 
-AnnualData = merge(initial,AnnualData);
+DailyReturns  = tick2ret(DailyData);
 
-AnnualReturns  = tick2ret(AnnualData);
-
-AnnualReturnsData = fts2mat(AnnualReturns);
-xmin = min(AnnualReturnsData);
+DailyReturnsData = fts2mat(DailyReturns);
+xmin = min(DailyReturnsData);
 xmin = round(xmin,1);
-xmax = max(AnnualReturnsData);
+xmax = max(DailyReturnsData);
 xmax= round(xmax,1);
 xtic = [xmin:.01:xmax];
-xmax1 = xmax + .01370;
-xtic = vertcat(xtic', xmax1);
+
+
 
 figure(32)
-%axis([xmin xmax 0 inf]);
-HistoGraphps = histogram(AnnualReturnsData,xtic);
-results = fts2mat(AnnualReturns, 1);
+
+HistoGraphps = histogram(DailyReturnsData,xtic);
+
+results = fts2mat(DailyReturns, 1);
 results(:,1) = str2num(datestr(datenum(results(:,1)),'YYYYmmDD'));
 
-xlswrite('AnnualReturnsData',AnnualReturnsData);
-xlswrite('AnnualReturnsDataResults',results);
+xlswrite('DailyReturnsData',DailyReturnsData);
+xlswrite('DailyReturnsDataResults',results);
+
+
 
 %end

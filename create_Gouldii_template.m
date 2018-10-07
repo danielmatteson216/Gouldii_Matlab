@@ -18,7 +18,7 @@ changefuncname;
        
         replaceLine = 0;
         newtext1 = 'function [sigprevious,sigw1,sigw2,ticker1,ticker2] = ';
-        newtext2 = '(Serial_startdate,Serial_enddate,CONTANGO,CONTANGO30,y_CONTANGO,y_CONTANGO30,y_sig,ContangoEntry,Contango30Entry,ContangoExit,Contango30Exit,LongContangoEntry,LongContango30Entry,TargetWeightVX1_S30,TargetWeightVX2_S30,TargetWeightVX1_S45,TargetWeightVX2_S45,curve_tickers)';
+        newtext2 = '(Serial_startdate,Serial_enddate,CONTANGO,CONTANGO30,y_CONTANGO,y_CONTANGO30,y_sig,ContangoEntry,Contango30Entry,ContangoExit,Contango30Exit,LongContangoEntry,LongContango30Entry,TargetWeightVX1_S30,TargetWeightVX2_S30,TargetWeightVX1_S45,TargetWeightVX2_S45,curve_tickers,gouldiiVCO)';
         newtext3 = strcat(newtext1,SelectedStrategy_input,newtext2);
         
         fileID = fopen(filepath, 'r+');
@@ -40,6 +40,6 @@ strategydir = strcat('C:\Program Files\Matlab\MATLAB Production Server\R2015a\bi
 mkdir(strategydir, 'Results');
 mkdir(strategydir, 'Graphs');
 mkdir(strategydir, 'OptParams');
-
+mkdir(strategydir, 'WFA');
 
 end

@@ -1,5 +1,9 @@
 
+
 %Read data from database.
+%---------------------------------------------------------------------
+%    SQL QUERIES TO GET DATA FROM DB
+%---------------------------------------------------------------------
 curs = exec(conn, ['SELECT 	*'...
     ' FROM 	gouldiidb.contracts '...
     'ORDER BY expiryDate']);
@@ -31,6 +35,22 @@ curs7 = exec(conn, ['SELECT 	*'...
     ' WHERE 	prices.ticker = ''vix'''...
     ' ORDER BY pDate ASC']); 
 
+curs8 = exec(conn, ['SELECT 	*'...
+    ' FROM 	gouldiidb.prices '...
+    ' WHERE 	prices.ticker = ''vix9d'''...
+    ' ORDER BY pDate DESC']); 
+
+curs9 = exec(conn, ['SELECT 	*'...
+    ' FROM 	gouldiidb.prices '...
+    ' WHERE 	prices.ticker = ''vix3m'''...
+    ' ORDER BY pDate DESC']); 
+
+curs10 = exec(conn, ['SELECT 	*'...
+    ' FROM 	gouldiidb.prices '...
+    ' WHERE 	prices.ticker = ''vix6m'''...
+    ' ORDER BY pDate DESC']);
+
+
 curs = fetch(curs);
 close(curs);
 
@@ -52,6 +72,24 @@ close(curs6);
 curs7 = fetch(curs7);
 close(curs7);
 
+curs8 = fetch(curs8);
+close(curs8);
+
+curs9 = fetch(curs9);
+close(curs9);
+
+curs10 = fetch(curs10);
+close(curs10);
+
+%---------------------------------------------------------------------
+
+
+
+
+
+%---------------------------------------------------------------------
+%    ASSIGN INPUT DATA TO OUTPUT VARIABLES
+%---------------------------------------------------------------------
 %Assign data to output variable
 contracts = curs.Data;
 prices = curs2.Data;
@@ -60,32 +98,52 @@ vx1 = curs4.Data;
 vx2 = curs5.Data;
 vx3 = curs6.Data;
 vix = curs7.Data;
+vix9d = curs8.Data;
+vix3m = curs9.Data;
+vix6m = curs10.Data;
 
 %Clear variables
-clear curs curs2 curs3 curs4 curs5 curs6 curs7
+clear curs curs2 curs3 curs4 curs5 curs6 curs7 curs8 curs9 curs10
 
+%---------------------------------------------------------------------
+
+
+
+
+
+
+%---------------------------------------------------------------------
+%    PERFORM MATLAB DATA MANIPULATION
+%---------------------------------------------------------------------
 %set trade date vector
 TradeDate = datetime(vx1(:,1));
 
 SERIAL_DATE_DATA = datenum(TradeDate);
 %convert to arrays
+VX1_settle = cell2mat(vx1(:,9));
 VX1_close = cell2mat(vx1(:,8));
 VX1_open = cell2mat(vx1(:,5));
 VX1_high = cell2mat(vx1(:,6));
 VX1_low = cell2mat(vx1(:,7));
 T1 = cell2mat(vx1(:,4));
 
+VX2_settle = cell2mat(vx2(:,9));
 VX2_close = cell2mat(vx2(:,8));
 VX2_open = cell2mat(vx2(:,5));
 VX2_high = cell2mat(vx2(:,6));
 VX2_low = cell2mat(vx2(:,7));
 T2 = cell2mat(vx2(:,4));
 
+VX3_settle = cell2mat(vx3(:,9));
 VX3_close = cell2mat(vx3(:,8));
 VX3_open = cell2mat(vx3(:,5));
 VX3_high = cell2mat(vx3(:,6));
 VX3_low = cell2mat(vx3(:,7));
 T3 = cell2mat(vx3(:,4));
+
+VIX3M_close = cell2mat(vix3m(:,7));
+VIX6M_close = cell2mat(vix6m(:,7));
+VIX9D_close = cell2mat(vix9d(:,7));
 
 CONTANGO_CLOSE = ((VX2_close./VX1_close) - 1);
 CONTANGO_OPEN = ((VX2_open./VX1_open) - 1);
@@ -105,12 +163,43 @@ CONTANGO_low(:,1) = (cellstr(datestr(TradeDate(:,1))));
 CONTANGO_low(:,2) = num2cell(CONTANGO_LOW(:,1));
 
 VIX = cell2mat(vix(:,7));
+VIX_len = length(VIX);
 
-%ma50d = tsmovavg(VIX,'s',50,1)
+vix3mlendiff = (VIX_len - length(VIX3M_close));
+vix3mtempvec = zeros(vix3mlendiff,1);
+VIX3M_close = [VIX3M_close;vix3mtempvec];
+VIX3M_close = flipud(VIX3M_close);
+VIX_VIX3M = (VIX./VIX3M_close)-1;
+
+vix6mlendiff = (VIX_len - length(VIX6M_close));
+vix6mtempvec = zeros(vix6mlendiff,1);
+VIX6M_close = [VIX6M_close;vix6mtempvec];
+VIX6M_close = flipud(VIX6M_close);
+VIX_VIX6M = (VIX./VIX6M_close)-1;
+
+vix9dlendiff = (VIX_len - length(VIX9D_close));
+vix9dtempvec = zeros(vix9dlendiff,1);
+VIX9D_close = [VIX9D_close;vix9dtempvec];
+VIX9D_close = flipud(VIX9D_close);
+VIX9D_VIX = (VIX9D_close./VIX)-1;
+
+VIX_ma50d = tsmovavg(VIX,'s',50,1);
+VIX_ma50d(1:49) = NaN;
+
+VIX_ma20d = tsmovavg(VIX,'s',20,1);
+VIX_ma20d(1:19) = NaN;
+
+VIX_ma200d = tsmovavg(VIX,'s',200,1);
+VIX_ma200d(1:199) = NaN;
+
+VIX9D_ma50d = tsmovavg(VIX9D_close,'s',50,1);
+VIX9D_ma50d(1:vix9dlendiff+49) = NaN;
+
+VIX9D_VIX_ma50d = tsmovavg(VIX9D_VIX,'s',50,1);
+VIX9D_VIX_ma50d(1:vix9dlendiff+49) = NaN;
 
 %set contango
 CONTANGO = CONTANGO_CLOSE;
-
 
 %TimeToExpiryDiff
 TDiff = T2 - T1;
@@ -132,6 +221,19 @@ CONTANGO30 = CONTANGO30_CLOSE;
 
 CONTANGO45 = CONTANGO45_CLOSE;
 
+%calculate gouldiiVCO
+gouldiiVCO = VIX + (100*CONTANGO30); 
+
+%---------------------------------------------------------------------
+
+
+
+
+
+
+%---------------------------------------------------------------------
+%    CALCULATE TARGET WEIGHTS
+%---------------------------------------------------------------------
     for i = 1:numel(SERIAL_DATE_DATA)
            TargetWeightVX1_S30(i, 1) = ((T2(i,1)-30)./(T2(i,1)-T1(i,1)));
             
@@ -156,26 +258,51 @@ CONTANGO45 = CONTANGO45_CLOSE;
            if T2(i,1) <= 45
            TargetWeightVX2_S45(i,1) = T2(i,1)./45;
            TargetWeightVX1_S45(i,1) = 0.0;
+           
+           else
+           TargetWeightVX1_S45(i,1) = (T1(i,1)./45);        
+           TargetWeightVX2_S45(i,1) = 0.0;
            end
         
-        TargetWeightVX1_S45(i, 1) = ((T2(i,1)-45)./(T2(i,1)-T1(i,1)));
 
-           TargetWeightVX2_S45(i,1) = (1 - TargetWeightVX1_S45(i,1));  %this is why 45 day didnt work  
     end       
+%---------------------------------------------------------------------
+
+
     
+    
+    
+    
+%---------------------------------------------------------------------
+%    EXTRA SHIT
+%---------------------------------------------------------------------    
     ExpDates = contracts(2:end,2);
 
 Date_string = datestr(TradeDate, 'mm/dd/yyyy');    
 Date_vector = datevec(SERIAL_DATE_DATA);
-TradeDate_converted = datetime(Date_string,'Format','d-MMM-y');
-TradeDate_NumFormat = yyyymmdd(TradeDate_converted);
+%TradeDate_converted = datetime(Date_string,'Format','d-MMM-y');
+TradeDate_NumFormat = yyyymmdd(TradeDate);
 
 %weekday for every trade date
 TradeDay = weekday(TradeDate);
 
 ROLL_YIELD(:,1) = ((VX1_close./VIX)-1);
+
+%---------------------------------------------------------------------
+
+
+
+
+
+
+%---------------------------------------------------------------------
+%    SAVE AND CLEAR
+%---------------------------------------------------------------------
 %clear('handles','hObject','eventdata');
-save('db_historicaldata.mat','ROLL_YIELD','CONTANGO','CONTANGO_low','T3','TradeDay','VX2_open','CONTANGO30','CONTANGO45','CONTANGO_open','TDiff','VIX','VX3_close','CONTANGO30_CLOSE','Date_string','TDiffCo30','TDiffCo45','VX1_close','VX3_high','i','CONTANGO_CLOSE','Date_vector','VX1_high','VX3_low','prices','CONTANGO_HIGH','ExpDates','TargetWeightVX1_S30','TargetWeightVX2_S45','TargetWeightVX1_S45','VX1_low','VX3_open','vix','CONTANGO_LOW','S30VX','TargetWeightVX2_S30','VX1_open','vx1','CONTANGO_OPEN','SERIAL_DATE_DATA','VX2_close','contracts','vx2','CONTANGO_close','T1','TradeDate_NumFormat','VX2_high','curve_tickers','vx3','CONTANGO_high','T2','TradeDate_converted','VX2_low') 
-clear('ROLL_YIELD','CONTANGO','CONTANGO_low','T3','TradeDay','VX2_open','CONTANGO30','CONTANGO_open','TDiff','VIX','VX3_close','CONTANGO30_CLOSE','Date_string','TDiffCo30','VX1_close','VX3_high','i','CONTANGO_CLOSE','Date_vector','TDiffnumer','VX1_high','VX3_low','prices','CONTANGO_HIGH','ExpDates','TargetWeightVX1_S30','VX1_low','VX3_open','vix','CONTANGO_LOW','S30VX','TargetWeightVX2_S30','VX1_open','vx1','CONTANGO_OPEN','SERIAL_DATE_DATA','VX2_close','contracts','vx2','CONTANGO_close','T1','TradeDate_NumFormat','VX2_high','curve_tickers','vx3','CONTANGO_high','T2','TradeDate_converted','VX2_low');
-save('db_tradedate.mat', 'TradeDate') 
+save('db_historicaldata.mat','CONTANGO45','CONTANGO45_CLOSE','S45VX','TDiffCo45','TDiffnumer30','TDiffnumer45','TargetWeightVX1_S45','TargetWeightVX2_S45','ROLL_YIELD','CONTANGO','CONTANGO_low','T3','TradeDay','VX2_open','VX2_settle','CONTANGO30','CONTANGO45','CONTANGO_open','TDiff','VIX','VX3_close','CONTANGO30_CLOSE','Date_string','TDiffCo30','TDiffCo45','VX1_close','VX1_settle','VX3_settle','VX3_high','i','CONTANGO_CLOSE','Date_vector','VX1_high','VX3_low','prices','CONTANGO_HIGH','ExpDates','TargetWeightVX1_S30','TargetWeightVX2_S45','TargetWeightVX1_S45','VX1_low','VX3_open','vix','CONTANGO_LOW','S30VX','TargetWeightVX2_S30','VX1_open','vx1','CONTANGO_OPEN','SERIAL_DATE_DATA','VX2_close','contracts','vx2','CONTANGO_close','T1','TradeDate_NumFormat','VX2_high','curve_tickers','vx3','CONTANGO_high','T2','VX2_low','gouldiiVCO','VIX_VIX3M','VIX_VIX6M','VIX9D_VIX','VIX_ma50d','VIX9D_ma50d','VIX9D_VIX_ma50d','VIX_ma20d','VIX_ma200d')
+clear('CONTANGO45','CONTANGO45_CLOSE','S45VX','TDiffCo45','TDiffnumer30','TDiffnumer45','TargetWeightVX1_S45','TargetWeightVX2_S45','ROLL_YIELD','CONTANGO','CONTANGO_low','T3','TradeDay','VX2_open','CONTANGO30','CONTANGO_open','TDiff','VIX','VX3_close','CONTANGO30_CLOSE','Date_string','TDiffCo30','VX1_close','VX3_high','i','CONTANGO_CLOSE','Date_vector','TDiffnumer','VX1_high','VX3_low','prices','CONTANGO_HIGH','ExpDates','TargetWeightVX1_S30','VX1_low','VX3_open','vix','CONTANGO_LOW','S30VX','TargetWeightVX2_S30','VX1_open','vx1','CONTANGO_OPEN','VX2_close','contracts','vx2','CONTANGO_close','T1','VX2_high','curve_tickers','vx3','CONTANGO_high','T2','TradeDate_converted','VX2_low','gouldiiVCO','VIX_VIX3M','VIX_VIX6M','VIX9D_VIX','VIX_ma50d','VIX9D_ma50d','VIX9D_VIX_ma50d','vix3m','VIX3M_close','vix3mlendiff','vix3mtempvec','vix6m','VIX6M_close','vix6mlendiff','vix6mtempvec','vix9d','VIX9D_close','vix9dlendiff','vix9dtempvec','VIX_len','VX1_settle','VX2_settle','VX3_settle','VIX_ma20d','VIX_ma200d');
+save('db_tradedate.mat', 'TradeDate','SERIAL_DATE_DATA','TradeDate_NumFormat') 
+
+%---------------------------------------------------------------------
+
 
