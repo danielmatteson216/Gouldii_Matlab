@@ -1,7 +1,7 @@
 
 clc;clear;close all;
 
-load('C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\Gouldii_Strategy_Prime_v2\WFA_strat2\20070820_20180810_WFAfinaloutput_20180925_062525.mat');
+load('C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\Gouldii_Strategy_Prime_v2\WFA\20090819_20181102_WFAfinaloutput_20181108_001040.mat');
 
 [NetLiqR, NetLiqC] = size(WFAfinaloutput);
 
@@ -39,7 +39,7 @@ xtic = vertcat(xtic', xmax1);
 
 figure(32)
 %axis([xmin xmax 0 inf]);
-HistoGraphps = histogram(AnnualReturnsData,xtic);
+HistoGraphs = histogram(AnnualReturnsData,xtic);
 results = fts2mat(AnnualReturns, 1);
 results(:,1) = str2num(datestr(datenum(results(:,1)),'YYYYmmDD'));
 

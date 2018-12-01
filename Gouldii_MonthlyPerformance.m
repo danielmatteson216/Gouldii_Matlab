@@ -1,7 +1,7 @@
 
 clc;clear;close all;
 
-load('C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\Gouldii_Strategy_Prime_v2\WFA_strat2\20070820_20180810_WFAfinaloutput_20180925_062525.mat');
+load('C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\Gouldii_Strategy_Prime_v2\WFA\20090819_20181102_WFAfinaloutput_20181108_001040.mat');
 
 [NetLiqR, NetLiqC] = size(WFAfinaloutput);
 

@@ -15,7 +15,7 @@ load('db_historicaldata.mat');
 load('db_tradedate.mat');
 
 % print all in sample wfa runs in excel ("1" = print all)
-wfalongexcel = 1;
+wfalongexcel = 0;
 
             assignin('base','sigprevious',sigprevious);
             assignin('base','VIX_VIX3M',VIX_VIX3M);
@@ -85,35 +85,50 @@ TradeDate_cellarray = cellstr(TradeDate_String);
   % deal with the god damn optimized parameters here!!!      
         
         
-        
-
+    if opt1numofsteps == 0    
+        if opt1upperbound == 0
+        OptimizedParameter1 = opt1lowerbound;
+        elseif opt1lowerbound == 0
+        OptimizedParameter1 = opt1upperbound;            
+        end    
+    else    
     h1 = (opt1upperbound - opt1lowerbound) / opt1numofsteps;
-    h2 = (opt2upperbound - opt2lowerbound) / opt2numofsteps;    
-    h3 = (opt3upperbound - opt3lowerbound) / opt3numofsteps;
-    h4 = (opt4upperbound - opt4lowerbound) / opt4numofsteps;    
-    
-    OptimizedParameter1 = (opt1lowerbound:h1:opt1upperbound);
-    OptimizedParameter2 = (opt2lowerbound:h2:opt2upperbound);    
-    OptimizedParameter3 = (opt3lowerbound:h3:opt3upperbound);    
-    OptimizedParameter4 = (opt4lowerbound:h4:opt4upperbound);
-    
-    % is this okay???? do we need it??
-    if isnan(h1)
-        h1 = 1; 
-        OptimizedParameter1 = 0;        
+    OptimizedParameter1 = (opt1lowerbound:h1:opt1upperbound);    
     end
-    if isnan(h2)
-        h2 = 1;   
-        OptimizedParameter2 = 0;        
+    
+    if opt2numofsteps == 0    
+        if opt2upperbound == 0
+        OptimizedParameter2 = opt2lowerbound;
+        elseif opt2lowerbound == 0
+        OptimizedParameter2 = opt2upperbound;            
+        end     
+    else 
+    h2 = (opt2upperbound - opt2lowerbound) / opt2numofsteps; 
+    OptimizedParameter2 = (opt2lowerbound:h2:opt2upperbound);      
+    end
+
+    if opt3numofsteps == 0    
+        if opt3upperbound == 0
+        OptimizedParameter3 = opt3lowerbound;
+        elseif opt3lowerbound == 0
+        OptimizedParameter3 = opt3upperbound;            
+        end       
+    else 
+    h3 = (opt3upperbound - opt3lowerbound) / opt3numofsteps;
+    OptimizedParameter3 = (opt3lowerbound:h3:opt3upperbound);     
+    end
+
+    if opt4numofsteps == 0    
+        if opt4upperbound == 0
+        OptimizedParameter4 = opt4lowerbound;
+        elseif opt4lowerbound == 0
+        OptimizedParameter4 = opt4upperbound;            
+        end     
+    else 
+    h4 = (opt4upperbound - opt4lowerbound) / opt4numofsteps;  
+    OptimizedParameter4 = (opt4lowerbound:h4:opt4upperbound);    
     end    
-    if isnan(h3)
-        h3 = 1; 
-        OptimizedParameter3 = 0;        
-    end    
-    if isnan(h4)
-        h4 = 1;    
-        OptimizedParameter4 = 0;        
-    end    
+ 
     
 % isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA
 %     isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA
@@ -166,51 +181,6 @@ end
 % isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA
 %     isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA   isMA        
 
-
-
-% if (opt1numofsteps == 0 || isnan(opt1numofsteps) == 1 || h1 == Inf) && opt1upperbound == 0 && opt1lowerbound ~= 0
-%     OptimizedParameter1 = opt1lowerbound;
-% elseif (opt1numofsteps == 0 || isnan(opt1numofsteps) == 1 || h1 == Inf) && opt1upperbound ~= 0 && opt1lowerbound == 0    
-%     OptimizedParameter1 = opt1upperbound;
-% elseif (opt1numofsteps == 0 || isnan(opt1numofsteps) == 1 || h1 == Inf) && opt1upperbound ~= 0 && opt1lowerbound ~= 0  
-%     OptimizedParameter1 = opt1lowerbound;
-% elseif (opt1numofsteps == 0 || isnan(opt1numofsteps) == 1 || h1 == Inf) && opt1upperbound == 0 && opt1lowerbound == 0  
-%     OptimizedParameter1 = opt1lowerbound;
-% end    
-
-% if (opt2numofsteps == 0 || isnan(opt2numofsteps) == 1 || h2 == Inf) && opt2upperbound == 0 && opt2lowerbound ~= 0
-%     OptimizedParameter2 = opt2lowerbound;
-% elseif (opt2numofsteps == 0 || isnan(opt2numofsteps) == 1 || h2 == Inf) && opt2upperbound ~= 0 && opt2lowerbound == 0    
-%     OptimizedParameter2 = opt2upperbound;
-% elseif (opt2numofsteps == 0 || isnan(opt2numofsteps) == 1 || h2 == Inf) && opt2upperbound ~= 0 && opt2lowerbound ~= 0  
-%     OptimizedParameter2 = opt2lowerbound;    
-% elseif (opt2numofsteps == 0 || isnan(opt2numofsteps) == 1 || h2 == Inf) && opt2upperbound == 0 && opt2lowerbound == 0  
-%     OptimizedParameter2 = opt2lowerbound;
-% end 
-
-% if (opt3numofsteps == 0 || isnan(opt3numofsteps) == 1 || h3 == Inf) && opt3upperbound == 0 && opt3lowerbound ~= 0
-%     OptimizedParameter3 = opt3lowerbound;
-% elseif (opt3numofsteps == 0 || isnan(opt3numofsteps) == 1 || h3 == Inf) && opt3upperbound ~= 0 && opt3lowerbound == 0    
-%     OptimizedParameter3 = opt3upperbound;
-% elseif (opt3numofsteps == 0 || isnan(opt3numofsteps) == 1 || h3 == Inf) && opt3upperbound ~= 0 && opt3lowerbound ~= 0  
-%     OptimizedParameter3 = opt3lowerbound;
-% elseif (opt3numofsteps == 0 || isnan(opt3numofsteps) == 1 || h3 == Inf) && opt3upperbound == 0 && opt3lowerbound == 0  
-%     OptimizedParameter3 = opt3lowerbound;
-% end    
-
-% if (opt4numofsteps == 0 || isnan(opt4numofsteps) == 1 || h4 == Inf) && opt4upperbound == 0 && opt4lowerbound ~= 0
-%     OptimizedParameter4 = opt4lowerbound;
-% elseif (opt4numofsteps == 0 || isnan(opt4numofsteps) == 1 || h4 == Inf) && opt4upperbound ~= 0 && opt4lowerbound == 0    
-%     OptimizedParameter4 = opt4upperbound;
-% elseif (opt4numofsteps == 0 || isnan(opt4numofsteps) == 1 || h4 == Inf) && opt4upperbound ~= 0 && opt4lowerbound ~= 0  
-%     OptimizedParameter4 = opt4lowerbound;    
-% elseif (opt4numofsteps == 0 || isnan(opt4numofsteps) == 1 || h4 == Inf) && opt4upperbound == 0 && opt4lowerbound == 0  
-%     OptimizedParameter4 = opt4lowerbound;
-% end 
-
-
-  % deal with the god damn optimized parameters here!!!   
-
   
   
 % -------------------------------------------------------------------------
@@ -233,6 +203,13 @@ loop3Kcnt = 0;
 loop2Mcnt = 0;
 loop1Jcnt = 0;
 
+%sigw1vec = zeros(SERIAL_DATE_LEN,length(OptimizedParameter1),length(OptimizedParameter2));
+%sigw2vec = zeros(SERIAL_DATE_LEN,length(OptimizedParameter1),length(OptimizedParameter2));
+%OUTPUT_CELL_ARRAY{1,length(OptimizedParameter1)} = [];
+%NetLiqTotal = zeros(SERIAL_DATE_LEN,length(OptimizedParameter1));
+%SharpeRatio = zeros(1,length(OptimizedParameter1));
+%CummROR = zeros(1,length(OptimizedParameter1));
+%NetProfit = zeros(1,length(OptimizedParameter1));
  %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  
      for p = 1:length(OptimizedParameter4)
@@ -372,7 +349,22 @@ end
   % CREATE OUTPUT GRAPHS AND SPREADSHEETS                                                
   %----------------------------------------------------------------------------------------------------------------------                                                   
 
-
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  % preallocate these variables
+  % OUTPUT_CELL_ARRAY
+  % NetLiqTotal(:,j)
+  
+  
+  
+  
                 OUTPUT_CELL_ARRAY{j} = finaloutput;
                 
         %save the netliq, sharperatio, and cummROR
@@ -383,6 +375,7 @@ end
         %calculate netprofit         
                 NetProfit(1,j) = cell2mat(NetLiqTotal(end,j)) - cell2mat(NetLiqTotal(1,j));
 
+                
                 counter = counter + 1;     
 
                 
@@ -404,6 +397,11 @@ end
                     end       
                 %#######################################################
 
+                % added stuff for new objective function
+                AnnualizedReturn(1,j) = (((1+CummROR(1,j)))^(365/length(NetLiqTotal(:,j))))-1;
+                AnnualizedReturn_MaxDD(1,j) = AnnualizedReturn(1,j)/MaxDD(j,1);
+               % Objective_function(1,j) = AnnualizedReturn_MaxDD(1,j);
+                
                     
                 % this is the linear optimizer output!!!
                 % -------------------------------------------------------
@@ -417,7 +415,7 @@ end
                 LinearOptResults(j,8) = num2cell(NetProfit(1,j));
                 LinearOptResults(j,9) = SharpeRatio(1,j);
                 LinearOptResults(j,10) = num2cell(((1+CummROR(1,j))^(365/length(sigw1)))-1);
-                %LinearOptResults(j,10) = num2cell(MaxDDindex(1,j));
+                LinearOptResults(j,11) = num2cell(AnnualizedReturn_MaxDD(1,j));                 %added for objective function
                 % -------------------------------------------------------
                 
                 
@@ -434,6 +432,19 @@ end
             
      end  %end of OUTSIDE LINEAR OPT LOOP (p loop)
 
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
 %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
  
     %this is likely not needed. it was a debugging tool. 
@@ -453,7 +464,7 @@ end
 
 
     %xlswrite('TOTAL_OUTPUT_ARRAY.xlsx',TOTAL_OUTPUT_ARRAY);
-    xlswrite('LinearOptResults.xlsx',LinearOptResults);
+    %xlswrite('LinearOptResults.xlsx',LinearOptResults);
 
     %remove the initial value row from the net liq output array
     NetLiqTotalMatrix = NetLiqTotalMatrix(2:end,:);
@@ -462,16 +473,20 @@ end
     %LinearOptResults
 
     %-----------------------------------
-    %calculate the annualized return:
+    %maximize the results:   OBJECTIVE FUNCTION
     [MaxSharpe,MaxSharpeIndex] = max(cell2mat(LinearOptimizerResults(1:end,9)))         ; 
     [MaxAnnualizedReturn,MaxAnnualizedReturnIndex] = max(cell2mat(LinearOptimizerResults(1:end,10)))    ;
+    [MaxAnnualizedReturn_MaxDD,MaxAnnualizedReturn_MaxDDIndex] = max(cell2mat(LinearOptimizerResults(1:end,11)))    ;
     %-----------------------------------
 
     %this should identify which output array is the optimal output array
-    output = LinearOpt2_OUTPUT_CELL_ARRAY{MaxSharpeIndex};    
+ 
     
     
-
+    %   objective function   SHARPE RATIO
+    %
+    output = LinearOpt2_OUTPUT_CELL_ARRAY{MaxSharpeIndex};  
+ 
     OptParameterA = LinearOptimizerResults{MaxSharpeIndex,1};
     OptParameterB = LinearOptimizerResults{MaxSharpeIndex,2};
     OptParameterC = LinearOptimizerResults{MaxSharpeIndex,3};
@@ -482,11 +497,30 @@ end
     OptNetProfit = LinearOptimizerResults{MaxSharpeIndex,8};
     OptSharpeRatio = LinearOptimizerResults{MaxSharpeIndex,9};
     OptAnnualizedReturn = LinearOptimizerResults{MaxSharpeIndex,10};
+    OptMaxAnnualizedReturn_MaxDD = LinearOptimizerResults{MaxSharpeIndex,11};
+    %}
+    
+    %   objective function   ANNUALIZED RETURN / MAXDD
+    %{
+    output = LinearOpt2_OUTPUT_CELL_ARRAY{MaxAnnualizedReturn_MaxDDIndex};    
+    
+    OptParameterA = LinearOptimizerResults{MaxAnnualizedReturn_MaxDDIndex,1};
+    OptParameterB = LinearOptimizerResults{MaxAnnualizedReturn_MaxDDIndex,2};
+    OptParameterC = LinearOptimizerResults{MaxAnnualizedReturn_MaxDDIndex,3};
+    OptParameterD = LinearOptimizerResults{MaxAnnualizedReturn_MaxDDIndex,4};
+    OptParameterE = LinearOptimizerResults{MaxAnnualizedReturn_MaxDDIndex,5};
+    OptParameterF = LinearOptimizerResults{MaxAnnualizedReturn_MaxDDIndex,6};
+    OptMaxDD = LinearOptimizerResults{MaxAnnualizedReturn_MaxDDIndex,7};
+    OptNetProfit = LinearOptimizerResults{MaxAnnualizedReturn_MaxDDIndex,8};
+    OptSharpeRatio = LinearOptimizerResults{MaxAnnualizedReturn_MaxDDIndex,9};
+    OptAnnualizedReturn = LinearOptimizerResults{MaxAnnualizedReturn_MaxDDIndex,10};
+    OptMaxAnnualizedReturn_MaxDD = LinearOptimizerResults{MaxAnnualizedReturn_MaxDDIndex,11};
+    %}
+    
 
+    LinearOpt3Labels = {'ParameterA','ParameterB','ParameterC','ParameterD','ParameterE','ParameterF','MaxDD','NetProfit','SharpeRatio','AnnualizedReturn','OptMaxAnnualizedReturn_MaxDD'};
 
-    LinearOpt3Labels = {'ParameterA','ParameterB','ParameterC','ParameterD','ParameterE','ParameterF','MaxDD','NetProfit','SharpeRatio','AnnualizedReturn'};
-
-    TotalLinearOpt3 = [LinearOptimizerResults(1:end,1),LinearOptimizerResults(1:end,2),LinearOptimizerResults(1:end,3),LinearOptimizerResults(1:end,4),LinearOptimizerResults(1:end,5),LinearOptimizerResults(1:end,6),LinearOptimizerResults(1:end,7),LinearOptimizerResults(1:end,8),LinearOptimizerResults(1:end,9),LinearOptimizerResults(1:end,10)];
+    TotalLinearOpt3 = [LinearOptimizerResults(1:end,1),LinearOptimizerResults(1:end,2),LinearOptimizerResults(1:end,3),LinearOptimizerResults(1:end,4),LinearOptimizerResults(1:end,5),LinearOptimizerResults(1:end,6),LinearOptimizerResults(1:end,7),LinearOptimizerResults(1:end,8),LinearOptimizerResults(1:end,9),LinearOptimizerResults(1:end,10),LinearOptimizerResults(1:end,11)];
 
     TotalLinearOpt = cat(1,LinearOpt3Labels, TotalLinearOpt3);
 
@@ -548,13 +582,6 @@ else
 
 
 end
-
-
-
-
-
-
-
 
 
 

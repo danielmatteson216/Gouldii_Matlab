@@ -139,7 +139,7 @@ for i = 1:nr
       %VX2 based on the start date  
      
 
-nexttradeday = weekday(busdate(SERIAL_DATE_DATA(i),1));     
+nexttradeday = weekday(busdate(SERIAL_DATE_DATA(i),1));     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%   potential for speed up here... should we just calculate the complete next trade day vector ahead of time and pass it to the function?
 
 %XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   %                  DAY ONE

@@ -1,0 +1,184 @@
+clear; clc; close all
+format long
+% NOTE: We need to track the number of test cases it takes to get a larger
+% solution value. As that number increases,the likelyhood of finding a
+% better solution value decreases. As this likelyhood decreases past some
+% threshold (this could be thought of as the some number of test guesses),
+% we should accept the last solution that was found.
+
+% how do we ensure we dont test the same value twice... or even values
+% within some tolerance of previous values? (does this matter? this seems
+% wrong) we dont want to spend time checking previous values every loop
+% tho.
+
+
+counter = 0;
+n = 35; %set total loop count
+T = 1.0;
+alpha = 0.90;
+
+Tmin = 0.01;
+startdate_string = '08/21/2006';
+enddate_string = '11/02/2018';
+
+% function definitions
+func                         = @(ParameterA, ParameterB, ParameterC, ParameterD) Math693A_finalproject( ParameterA, ParameterB, ParameterC, ParameterD, startdate_string,enddate_string);
+vf                           = @(x)              func(x(1,:),x(2,:),x(3,:),x(4,:));           %FUNCTION
+
+lb_A = 0;
+rb_A = 0.16;
+
+lb_B = 0;
+rb_B = 0.16;
+
+lb_C = -0.15;
+rb_C = 0;
+
+lb_D = -0.15;
+rb_D = 0;
+
+spreadA = (rb_A - lb_A);
+spreadB = (rb_B - lb_B);
+spreadC = (rb_C - lb_C);
+spreadD = (rb_D - lb_D);
+
+%initA = lb_A + ((spreadA)/(1/T)).*randn(1) ;
+%initB = lb_B + ((spreadB)/(1/T)).*randn(1) ;
+%initC = lb_C + ((spreadC)/(1/T)).*randn(1) ;
+%initD = lb_D + ((spreadD)/(1/T)).*randn(1) ;  wtf?!?!
+
+
+% delta =   mean    +      std * randn       % normally distributed variable around mean with standard deviation
+%initA = (lb_A + spreadA/2) + ((spreadA)/(1/T))*randn() ;
+%initB = (lb_B + spreadB/2) + ((spreadB)/(1/T))*randn() ;
+%initC = (lb_C + spreadC/2) + ((spreadC)/(1/T))*randn() ;
+%initD = (lb_D + spreadD/2) + ((spreadD)/(1/T))*randn() ;  
+
+initA = (lb_A + spreadA/2);
+initB = (lb_B + spreadB/2);
+initC = (lb_C + spreadC/2);
+initD = (lb_D + spreadD/2);  
+
+
+InitialParameterA = initA
+InitialParameterB = initB
+InitialParameterC = initC
+InitialParameterD = initD
+%%
+NewMaxParameterA            = zeros(n,1);
+NewMaxParameterB            = zeros(n,1);
+NewMaxParameterC            = zeros(n,1);
+NewMaxParameterD            = zeros(n,1);
+NewMaxObjectiveFunction     = zeros(n,1);
+NewMaxSharpeRatio           = zeros(n,1);
+
+xk = [  InitialParameterA
+        InitialParameterB
+        InitialParameterC
+        InitialParameterD  ]
+
+    %neighborhood calcs
+
+
+[initsharpe,initOF] = vf(xk);
+
+
+%---------------------------------------------------------------------
+        counter = 1; 
+  
+   while T > Tmin
+            
+
+        i = 1;
+        % WHILE LOOP - used to determine if our position is a minimum
+        %while randsharpe <= initsharpe                                                                 
+        while i <= n  
+            
+            deltaA = ((spreadA)/(1/T)).*randn(1); 
+            deltaB = ((spreadB)/(1/T)).*randn(1); 
+            deltaC = ((spreadC)/(1/T)).*randn(1); 
+            deltaD = ((spreadD)/(1/T)).*randn(1); 
+
+            xkrand = [deltaA+xk(1) ; deltaB+xk(2) ; deltaC+xk(3) ; deltaD+xk(4) ];
+            
+            % add if statements here
+            
+                if xkrand(1) > rb_A || xkrand(1) < lb_A
+                    xkrand(1) = xk(1); 
+                end 
+                
+                if xkrand(2) > rb_B ||  xkrand(2) < lb_B
+                    xkrand(2) = xk(2); 
+                end 
+                
+                if xkrand(3) > rb_C || xkrand(3) < lb_C
+                    xkrand(3) = xk(3); 
+                end 
+                
+                if xkrand(4) > rb_D || xkrand(4) < lb_D
+                    xkrand(4) = xk(4); 
+                end             
+                
+            [randsharpe,randOF] = vf(xkrand);
+            
+            if randsharpe > initsharpe
+               BestOF(i,:) = randsharpe;
+               BestXK(i,:) = xkrand;
+            else
+               BestOF(i,:) = initsharpe;
+               BestXK(i,:) = xk;
+            end    
+           OFdiff = randsharpe-initsharpe; 
+           
+%{
+            if randOF > initOF
+               BestOF(i,:) = randOF;
+               BestXK(i,:) = xkrand;
+            else
+               BestOF(i,:) = initOF;
+               BestXK(i,:) = xk;
+            end
+            OFdiff = randOF-initOF;    
+%}
+            
+
+            %calculate the acceptance probability here
+            a = (exp(OFdiff/T))
+            
+                if OFdiff >= 0
+                     xk = xkrand;
+                    initOF = randOF; 
+                    initsharpe = randsharpe;
+                    
+                elseif OFdiff < 0
+                    
+                    if a > rand(1)  %should this be normally distributed
+                    xk = xkrand;
+                    initOF = randOF; 
+                    initsharpe = randsharpe;                    
+                    end
+                    
+                end
+
+            randomobjectivefunctionvalue = randOF;
+            randomsharperatio = randsharpe;
+            
+            initobjectiverunctionvalue = initOF;
+            initsharperatio = initsharpe;
+            %initOF = randOF;
+            
+            i = i + 1;
+        end
+    
+    OverallBestOF(counter,:) = BestOF(end,:);
+    OverallBestXK(counter,:) = BestXK(end,:);
+    
+    OverallBestOFTEST(counter,:) = initsharpe;
+    OverallBestXKTEST(counter,:) = xk;
+     
+    T = alpha*T;
+    newT = T
+    
+    counter = counter + 1;
+   end
+    

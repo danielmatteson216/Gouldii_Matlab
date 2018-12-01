@@ -110,7 +110,7 @@ status4 = 'Querying Database for historical data';
 set(handles.status_GUI,'String',status4);
 pause(.5);
 conn = evalin('base','conn');
-run('dbinit1.m');
+run('dbinit2.m');
 status5 = 'Historical data uploaded';
 set(handles.status_GUI,'String',status5);
 set(handles.dbGetData_button, 'enable', 'off')
