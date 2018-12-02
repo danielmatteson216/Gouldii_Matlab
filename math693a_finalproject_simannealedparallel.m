@@ -7,7 +7,7 @@ format long
 startdate_string = '08/21/2006';
 enddate_string = '11/02/2018';
 
-parfor cnt = 1:4
+parfor cnt = 1:6
 
 %User defined variables
 n = 40; %set total loop count
