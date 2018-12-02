@@ -1,20 +1,26 @@
 clear; clc; close all
 format long
-% function definitions
-func                         = @(ParameterA, ParameterB, ParameterC, ParameterD) Math693A_finalproject( ParameterA, ParameterB, ParameterC, ParameterD, startdate_string,enddate_string);
-vf                           = @(x)              func(x(1,:),x(2,:),x(3,:),x(4,:));           %FUNCTION
+%parpool('local',[4,16])
 
-parfor cnt = 1:10
+
+%set date range
+startdate_string = '08/21/2006';
+enddate_string = '11/02/2018';
+
+parfor cnt = 1:4
 
 %User defined variables
 n = 40; %set total loop count
 T = 1.0; %max temp (starting value)
 alpha = 0.90; %cooling coefficient 
-Tmin = 0.01; %minimum temp (stopping condition)
+Tmin = 0.01; %minimum temp (stopping condition)    
+    
+% function definitions
+func                         = @(ParameterA, ParameterB, ParameterC, ParameterD) Math693A_finalproject( ParameterA, ParameterB, ParameterC, ParameterD, startdate_string,enddate_string);
+vf                           = @(x)              func(x(1,:),x(2,:),x(3,:),x(4,:));           %FUNCTION
+    
+    
 
-%set date range
-startdate_string = '08/21/2006';
-enddate_string = '11/02/2018';
 
 
 %set parameter ranges
@@ -108,7 +114,8 @@ i = 0; %loop semaphore variable
          
             %determines which objective function we are optimizing
             % OFdiff = randsharpe-initsharpe;         OFtype = 'Sharpe';    
-             OFdiff = randOF-initOF;                OFtype = 'MaxAnnualizedReturn/MaxDD';                
+             OFdiff = randOF-initOF;               
+             OFtype = 'MaxAnnualizedReturn/MaxDD';                
 
             %calculate the acceptance probability here
             a = (exp(OFdiff/T))
@@ -148,4 +155,4 @@ end
     
    randnumber = num2str(floor(rand()*1000));               %create random number to be used for filename
    outputstring = strcat('SAoutput',randnumber,'.mat');     %create output string for filename
-   save(outputstring,totalparforoutput,totalparforoutputxk,totalparforoutputsharpe);  %save workspace data
+   save(outputstring);  %save workspace data
