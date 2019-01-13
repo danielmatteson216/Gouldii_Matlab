@@ -2227,6 +2227,11 @@ isWFA = get(handles.checkbox_wfa, 'Value');
 %is MA?
 isMA = get(handles.checkbox_MA, 'Value');
 
+%isLO?
+
+%-isSA?
+
+
 status_loading = 'Loading Data';
 set(handles.status_GUI,'String',status_loading);
 drawnow;
@@ -2474,28 +2479,50 @@ end
             if isWFA == 1
                 DaysInSample = get(handles.edit_wfaperiod,'String');
                 DaysInSample = str2num(DaysInSample);
+                
+                MonthsInSample = get(handles.edit_wfaperiod,'String');
+                %delete the below line !!!!!!!!!!!!!!
+                MonthsInSample = '12'; % delete
+                MonthsInSample = str2num(MonthsInSample);
 
                 if isempty(DaysInSample)
-                   DaysInSample = 150;
-                end   
+                   DaysInSample = 250;
+                end  
+                if isempty(MonthsInSample)
+                   MonthsInSample = 12;
+                end                  
 
                 PercentOutofSample = get(handles.edit_wfasample,'String');
                 PercentOutofSample = str2num(PercentOutofSample);
-
+                
+                NumofMonthsOutofSample = get(handles.edit_wfasample,'String');
+                %delete the below line !!!!!!!!!!!!!!                
+                NumofMonthsOutofSample = '3'; %delete
+                NumofMonthsOutofSample = str2num(NumofMonthsOutofSample);
+                
                 if isempty(PercentOutofSample)
                     PercentOutofSample = 25;
                 end
+                if isempty(NumofMonthsOutofSample)
+                    NumofMonthsOutofSample = 3;
+                end                
 
                 PercentOutofSample = PercentOutofSample * .01;
 
                 DaysOutSample = floor(PercentOutofSample * DaysInSample);
-
+                
                 TradeDateSerial = datenum(TradeDate);
 
                 startdate = datefind(Serial_startdate_actual,TradeDateSerial);
                 enddate = datefind(Serial_enddate_actual,TradeDateSerial);
 
                 NumOfTradeDays = enddate - startdate;
+                start_date = datetime(Serial_startdate_actual,'ConvertFrom','datenum');
+                end_date = datetime(Serial_enddate_actual,'ConvertFrom','datenum');
+                
+                NumOfTradeMonths = between(start_date,end_date,'months');
+                NumOfTradeMonths = split(NumOfTradeMonths,'months');
+                
                 startdateOutofSample = startdate +DaysInSample;
                 TradeDateOutofSample = TradeDate_NumFormat;
                 TradeDateOutofSample = TradeDateOutofSample(startdateOutofSample:enddate);
@@ -2505,6 +2532,63 @@ end
 
                 NumOfPeriods = ceil(WFAdatediff ./ DaysOutSample);
                 startwfaperiodindex = 1;
+                
+                % wfa months test
+                % ----------------------------
+                WFAoutofsamplestartdate_months = datemnth(Serial_startdate_actual, MonthsInSample);
+                
+                WFA_NumOfPeriods_months = ceil(NumOfTradeMonths ./ NumofMonthsOutofSample);
+      
+                %{
+                
+                % if WFAmonths = 1 !!!!!!!!!!!!
+                for i = 1:WFA_NumOfPeriods_months
+                    %
+                    if i == 1
+                        WFAdateindexrange_months(i,1) = startwfaperiodindex;
+                        WFAdateindexrange_months(i,2) = DaysInSample + startwfaperiodindex -1; 
+                        WFAdateindexrange_months(i,3) = WFAdateindexrange_months(i,2) + 1; 
+                        WFAdateindexrange_months(i,4) = WFAdateindexrange_months(i,3) + DaysOutSample - 1;         
+                    else
+                        WFAdateindexrange_months(i,1) = WFAdateindexrange_months(i-1,1) + DaysOutSample;
+                        WFAdateindexrange_months(i,2) = WFAdateindexrange_months(i,1) + DaysInSample - 1; 
+                        WFAdateindexrange_months(i,3) = WFAdateindexrange_months(i,2) + 1;
+
+                        if i == NumOfPeriods
+                            WFAdateindexrange_months(i,4) = enddate;        
+                        else
+                            WFAdateindexrange_months(i,4) = WFAdateindexrange_months(i,3) + DaysOutSample - 1;
+                        end    
+
+                    end
+                    %
+                    
+                        % ADD CHECKS TO ENSURE THE DATE IS AN ACTUAL BUSINESS/TRADING DAY
+                    if i == 1
+                        WFAdaterange_months(i,1) = TradeDateSerial(1);
+                        WFAdaterange_months(i,2) = datemnth(TradeDateSerial(1), MonthsInSample); 
+                        WFAdaterange_months(i,3) = busdate(WFAdaterange_months(i,2), 1);
+                        WFAdaterange_months(i,4) = datemnth(WFAdaterange_months(i,3), NumofMonthsOutofSample);
+                    elseif i > 1
+                        
+                        WFAdaterange_months(i,1) = datemnth(WFAdaterange_months(i-1,1), NumofMonthsOutofSample);
+                        WFAdaterange_months(i,2) = datemnth(WFAdaterange_months(i,1), MonthsInSample); 
+                        WFAdaterange_months(i,3) = busdate(WFAdaterange_months(i-1,4), 1);
+                        WFAdaterange_months(i,4) = datemnth(WFAdaterange_months(i,3), NumofMonthsOutofSample);                        
+                        
+                    end
+                    
+                        %if i == WFA_NumOfPeriods_months
+                       %     WFAdaterange_months(i,4) = TradeDateSerial(enddate);        
+                        %else
+                       %     WFAdaterange_months(i,4) = TradeDateSerial(WFAdateindexrange(i,4)+ startdate - 1);
+                       % end    
+
+                end                
+                
+                %}
+                
+                %-----------------------------
 
                 for i = 1:NumOfPeriods
                     if i == 1
@@ -2636,24 +2720,101 @@ WFAoptparamstitles = {'Iteration #';'OptimizedStartDate';'OptimizedEndDate';'Opt
         Serial_enddate_actual = WFAdaterange(i,2);   
           
         %------
+          
+        
+                                    %make decision to run LO or SA... isWFA & isLO or isWFA & isSA
+                                   %  XXXXXXXXXXXXXXXX   if isWFA & isLO do this XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                                   
+                                   %
+                                                   try
+                                                             [TotalLinearOpt,sigprevious,OptParameterA,OptParameterB,OptParameterC,OptParameterD,OptParameterE,OptParameterF,OptMaxDD,OptNetProfit,OptSharpeRatio,OptAnnualizedReturn,isfirstday,cashonweekendsflag,output]...
+                                                                 = Gouldii_SignalsLinearOptimizer_v3(StrategyPath, SelectedStrategy, Commission, initialportfolio, StopLoss,Serial_startdate_actual,Serial_enddate_actual,...
+                                                                                                     OptimizedParameter1String,opt1numofsteps,opt1lowerbound,opt1upperbound,OptimizedParameter2String,opt2numofsteps,opt2lowerbound,opt2upperbound,...
+                                                                                                     OptimizedParameter3String,opt3numofsteps,opt3lowerbound,opt3upperbound,OptimizedParameter4String,opt4numofsteps,opt4lowerbound,opt4upperbound,...
+                                                                                                     ParameterA,ParameterB,ParameterC,ParameterD,ParameterE,ParameterF,isfirstday,startdate_string,sigprevious,isWFA,isMA);               
 
-       try
-                                     [TotalLinearOpt,sigprevious,OptParameterA,OptParameterB,OptParameterC,OptParameterD,OptParameterE,OptParameterF,OptMaxDD,OptNetProfit,OptSharpeRatio,OptAnnualizedReturn,isfirstday,cashonweekendsflag,output]...
-                                         = Gouldii_SignalsLinearOptimizer_v3(StrategyPath, SelectedStrategy, Commission, initialportfolio, StopLoss,Serial_startdate_actual,Serial_enddate_actual,...
-                                         OptimizedParameter1String,opt1numofsteps,opt1lowerbound,opt1upperbound,OptimizedParameter2String,opt2numofsteps,opt2lowerbound,opt2upperbound,...
-                                         OptimizedParameter3String,opt3numofsteps,opt3lowerbound,opt3upperbound,OptimizedParameter4String,opt4numofsteps,opt4lowerbound,opt4upperbound,...
-                                         ParameterA,ParameterB,ParameterC,ParameterD,ParameterE,ParameterF,isfirstday,startdate_string,sigprevious,isWFA,isMA);               
-           
-            % ERROR IN ATTEMPT TO RUN LO CODE
-        catch
-             disp('Error in LO code running WFA, error on run#');
-             disp(num2str(i));
-            set(handles.status_GUI,'String',status_error4);
-            drawnow; 
-            pause(3.2);
-            set(handles.status_GUI,'String',status_start);
-            drawnow; 
-        end
+                                                        % ERROR IN ATTEMPT TO RUN LO CODE
+                                                    catch
+                                                         disp('Error in LO code running WFA, error on run#');
+                                                         disp(num2str(i));
+                                                        set(handles.status_GUI,'String',status_error4);
+                                                        drawnow; 
+                                                        pause(3.2);
+                                                        set(handles.status_GUI,'String',status_start);
+                                                        drawnow; 
+                                                   end
+                                   
+                                   
+                                    %{ 
+                                   
+                                    [TotalLinearOpt,sigprevious,OptParameterA,OptParameterB,OptParameterC,OptParameterD,OptParameterE,OptParameterF,OptMaxDD,OptNetProfit,OptSharpeRatio,OptAnnualizedReturn,isfirstday,cashonweekendsflag,output,SharpeRatioSA,AnnualizedReturn_MaxDD]...
+                                                                    = Gouldii_SignalsSimulatedAnnealing(SelectedStrategy,Serial_startdate_actual,Serial_enddate_actual,CONTANGO,CONTANGO30,...
+                                                                                                          ParameterA,ParameterB,ParameterC,ParameterD,ParameterE,ParameterF,...
+                                                                                                          TargetWeightVX1_S30,TargetWeightVX2_S30,TargetWeightVX1_S45,TargetWeightVX2_S45,curve_tickers,gouldiiVCO,...
+                                                                                                          VIX_VIX3M,VIX_VIX6M,VIX9D_VIX,VIX_ma50d,VIX9D_ma50d,VIX9D_VIX_ma50d,VIX_ma20d,VIX_ma200d,VIX,isfirstday,sigprevious,isWFA,isMA,...
+                                                                                                          Commission,initialportfolio,SERIAL_DATE_DATA,...
+                                                                                                          TradeDate, ExpDates, ...
+                                                                                                          TradeDate_NumFormat,T1,T2,StopLoss,TradeDay, ROLL_YIELD,...
+                                                                                                          VX1_close,VX1_open,VX1_high,VX1_low,VX2_close,VX2_open,VX2_high,VX2_low,VX1_settle,VX2_settle);
+                                   
+                                   
+                                   
+                                   
+                                                    
+                                    %               
+                                    %make decision to run LO or SA... isWFA & isLO or isWFA & isSA
+                                   %  XXXXXXXXXXXXXXXX   if isWFA & isSA do this XXXXXXXXXXXXXXXXXXXXXXXXXXXXX                                                   
+                                                 
+                                                   
+                                                    try
+
+
+                                                        
+                                                        xk = Gouldii_SimulatedAnnealing(SelectedStrategy,Serial_startdate_actual,Serial_enddate_actual,CONTANGO,CONTANGO30,...
+                                                                                                          ParameterA,ParameterB,ParameterC,ParameterD,ParameterE,ParameterF,...
+                                                                                                          TargetWeightVX1_S30,TargetWeightVX2_S30,TargetWeightVX1_S45,TargetWeightVX2_S45,curve_tickers,gouldiiVCO,...
+                                                                                                          VIX_VIX3M,VIX_VIX6M,VIX9D_VIX,VIX_ma50d,VIX9D_ma50d,VIX9D_VIX_ma50d,VIX_ma20d,VIX_ma200d,VIX,isfirstday,sigprevious,isWFA,isMA,...
+                                                                                                          Commission,initialportfolio,SERIAL_DATE_DATA,...
+                                                                                                          TradeDate, ExpDates, ...
+                                                                                                          TradeDate_NumFormat,T1,T2,StopLoss,TradeDay, ROLL_YIELD,...
+                                                                                                          VX1_close,VX1_open,VX1_high,VX1_low,VX2_close,VX2_open,VX2_high,VX2_low,VX1_settle,VX2_settle);     
+%{                                                                                                      
+                                                        ParameterA = xk(1);
+                                                        ParameterB = xk(2);
+                                                        ParameterC = xk(3);
+                                                        ParameterD = xk(4);
+                                                        
+                                                       [TotalLinearOpt,sigprevious,OptParameterA,OptParameterB,OptParameterC,OptParameterD,OptParameterE,OptParameterF,OptMaxDD,OptNetProfit,OptSharpeRatio,OptAnnualizedReturn,isfirstday,cashonweekendsflag,output,SharpeRatioSA,AnnualizedReturn_MaxDD]...
+                                                           = Gouldii_SignalsSimulatedAnnealing(SelectedStrategy,Serial_startdate_actual,Serial_enddate_actual,CONTANGO,CONTANGO30,...
+                                                                                                          ParameterA,ParameterB,ParameterC,ParameterD,ParameterE,ParameterF,...
+                                                                                                          TargetWeightVX1_S30,TargetWeightVX2_S30,TargetWeightVX1_S45,TargetWeightVX2_S45,curve_tickers,gouldiiVCO,...
+                                                                                                          VIX_VIX3M,VIX_VIX6M,VIX9D_VIX,VIX_ma50d,VIX9D_ma50d,VIX9D_VIX_ma50d,VIX_ma20d,VIX_ma200d,VIX,isfirstday,sigprevious,isWFA,isMA,...
+                                                                                                          Commission,initialportfolio,SERIAL_DATE_DATA,...
+                                                                                                          TradeDate, ExpDates, ...
+                                                                                                          TradeDate_NumFormat,T1,T2,StopLoss,TradeDay, ROLL_YIELD,...
+                                                                                                          VX1_close,VX1_open,VX1_high,VX1_low,VX2_close,VX2_open,VX2_high,VX2_low,VX1_settle,VX2_settle);                                              
+                                                                                                      
+  %}                                                                                                    
+
+                                                        % ERROR IN ATTEMPT TO RUN LO CODE
+                                                        %
+                                                    catch
+                                                        disp('Error in LO code running WFA, error on run#');
+                                                        disp(num2str(i));
+                                                        set(handles.status_GUI,'String',status_error4);
+                                                        drawnow; 
+                                                        pause(3.2);
+                                                        set(handles.status_GUI,'String',status_start);
+                                                        drawnow; 
+                                                   end
+                                                        %}
+                                                   
+                                                   
+                                   
+                                   
+                                   
+                                                   
+                                                   
 
             assignin('base','sigprevious',sigprevious);
 try
@@ -2758,15 +2919,23 @@ end
 
  wfacount = num2str(i);
  wfaperiods = num2str(NumOfPeriods);
- statuswfa = strcat('End of run_', wfacount, ' of total_', wfaperiods, ' number of runs');
+ wfapercentdata = num2str((i/NumOfPeriods)*100);
+ statuswfa = strcat('End of run_', wfacount, ' of total_', wfaperiods, ' number of runs --- [', wfapercentdata,'%] ----');
  %statuswfa = strcat('End of run ', wfacount);
  %statuswfa = strcat(statuswfa,'of total',' ');
  %statuswfa = strcat(statuswfa,wfaperiods);
  %statuswfa = strcat(statuswfa,' number of runs');
  disp(statuswfa);
+ 
+ 
     end
  %--------------------------------------------------------------------------------------------------------------
  % end of WFA loop
+ 
+ 
+ 
+ 
+ 
         WFAoptparamscell = num2cell(WFAoptparams);
         WFAoptparamscell = [WFAoptparamstitles';WFAoptparamscell]; 
 
@@ -2889,7 +3058,11 @@ BuyandholdCummROR = cell2mat(BuyandholdCummRORcell);
 BuyandholdNetProfit = cell2mat(BuyandholdNetLiqTotal(end)) - cell2mat(BuyandholdNetLiqTotal(1));
 BuyandholdNetLiqTotaldoubles = cell2mat(BuyandholdNetLiqTotal);
 
-[BuyandholdMaxDD,BuyandholdMaxDDindex] = maxdrawdown(BuyandholdNetLiqTotaldoubles);
+%if BuyandholdNetLiqTotal < 0
+%    disp('Error BuyandHold strategy NetLiqTotal is negative - taking absolute value of NetLiqTotal to continue...');
+%end    
+
+[BuyandholdMaxDD,BuyandholdMaxDDindex] = maxdrawdown(BuyandholdNetLiqTotaldoubles); %ADDED abs here!! we need to fix this buynhold bullshit
 
 BuyandholdAnnualizedReturn = (((1+BuyandholdCummROR))^(365/length(sigw1)))-1;
 

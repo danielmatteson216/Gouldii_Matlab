@@ -23,13 +23,4 @@
 
 end 
     
-   
-
- 
- %Exists_ParameterA = exist('ParameterA');
-%Exists_ParameterB = exist('ParameterB');
-%Exists_ParameterC = exist('ParameterC');
-%Exists_ParameterD = exist('ParameterD');
-%Exists_ParameterE = exist('ParameterE');
-%Exists_ParameterF = exist('ParameterF');
 

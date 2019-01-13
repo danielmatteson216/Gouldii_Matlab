@@ -103,13 +103,22 @@ RunStrategyFileName = evalin('base','RunStrategyFileName');
 RunStrategyPathName = evalin('base','RunStrategyPathName'); 
 loadfile = strcat(RunStrategyPathName,'/',RunStrategyFileName);
 load(loadfile);
+histocolor = 'b';
+histotrans = .7;
 
+SelectedStrategy_temp = RunStrategyFileName(19:end-20);
+
+
+     Gouldii_AnnualPerformance;
+     Gouldii_MonthlyPerformance;
+     Gouldii_DailyPerformance(WFAfinaloutput, histocolor,histotrans,TradeDate,initialportfolio,SelectedStrategy_temp);
+     
 % CODE GOES HERE
 SelectedStrategy        = 'Gouldii_Strategy_BuyandHold_v2.m';
 StrategyPath            = 'C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Strategies\';
 TradeDateLength = length(TradeDate);
-Commission              = 0;
-initialportfolio        = 1000000;
+%Commission              = 0;
+%initialportfolio        = 1000000;
 StopLoss                = 1;
 Serial_startdate_actual = datenum(TradeDate(1));
 Serial_enddate_actual   = datenum(TradeDate(TradeDateLength));
@@ -212,14 +221,96 @@ BuynHoldNetLiqTotaldoubles = cell2mat(BuynHoldNetLiqTotal);
 
 BuynHoldAnnualizedReturn = (((1+BuynHoldCummROR))^(365/length(BuynHoldNetLiqTotal)))-1;
 
+%TenPecentAnnual = (1.1^(1/250) ) %initialportfolio*0.10 + initialportfolio); %need to get the slope right for an annualized return of TenPercent
+
 %plot here!!
 figure(1)
       plot(TradeDate,WFA_NetLiqTotaldoubles,'g');
         set(gca,'YScale','log')
         hold on
-        plot(TradeDate,BuynHoldNetLiqTotaldoubles);   
+        plot(TradeDate,BuynHoldNetLiqTotaldoubles); 
+        %hold on 
+        %plot(TradeDate,TenPercentAnnual);
      hold off 
-% CODE GOES HERE
+     
+ figure(2)
+  plot(TradeDate,WFA_NetLiqTotaldoubles,'g');
+    hold on
+    plot(TradeDate,BuynHoldNetLiqTotaldoubles);   
+ hold off 
+     
+ 
+ 
+ 
+NetLiqTotal = WFAfinaloutput(3:end,30);
+SharpeRatio = cell2mat(WFAfinaloutput(end,47));
+CummRORcell = WFAfinaloutput(end,46);
+CummROR = cell2mat(CummRORcell);
+NetProfit = cell2mat(NetLiqTotal(end)) - cell2mat(NetLiqTotal(1));
+NetLiqTotaldoubles = cell2mat(NetLiqTotal);
+
+[MaxDD,MaxDDindex] = maxdrawdown(NetLiqTotaldoubles);
+
+AnnualizedReturn = (((1+CummROR))^(365/length(NetLiqTotaldoubles)))-1;
+
+
+disp('Sharpe Ratio for OutOfSample Run:');
+disp(SharpeRatio);
+disp('NetProfit for OutOfSample Run:');
+disp(NetProfit);
+disp('AnnualizedReturn for OutOfSample Run:');
+disp(AnnualizedReturn);
+disp('Max Drawdown for OutOfSample Run:');
+disp(MaxDD);  
+
+%this is some bullshit that can be deleted. we are cheating to get spxt data
+load('SPXT_RETURNS.mat')
+%SPXT_CLOSE = SPXT_CLOSE(251:end);
+%SPXT_Returns = SPXT_Returns(250:end);
+
+
+%disp('SPXT_GOULDII Correlation factor')
+%SPXT_GOULDII_corrcoef = corrcoef(SPXT_CLOSE,NetLiqT)
+%SPXT_GOULDII_corrcoef = corrcoef(SPXT_Returns,DailyReturnsData)
+
+%SPXT_GOULDII_cov = cov(SPXT_CLOSE,NetLiqT)
+%SPXT_GOULDII_covr = cov(SPXT_Returns,DailyReturnsData)
+histocolor = 'y';
+histotrans = 0.5;
+
+WFAfinaloutput = output;
+     Gouldii_AnnualPerformance;
+     Gouldii_MonthlyPerformance;
+     Gouldii_DailyPerformance(output, histocolor,histotrans,TradeDate,initialportfolio,SelectedStrategy_temp);
+ 
+     % CODE GOES HERE
+
+     
+
+NetLiqTotal = WFAfinaloutput(3:end,30);
+SharpeRatio = cell2mat(WFAfinaloutput(end,47));
+CummRORcell = WFAfinaloutput(end,46);
+CummROR = cell2mat(CummRORcell);
+NetProfit = cell2mat(NetLiqTotal(end)) - cell2mat(NetLiqTotal(1));
+NetLiqTotaldoubles = cell2mat(NetLiqTotal);
+
+[MaxDD,MaxDDindex] = maxdrawdown(NetLiqTotaldoubles);
+
+AnnualizedReturn = (((1+CummROR))^(365/length(NetLiqTotaldoubles)))-1;
+
+
+disp('Sharpe Ratio for OutOfSample Run:');
+disp(SharpeRatio);
+disp('NetProfit for OutOfSample Run:');
+disp(NetProfit);
+disp('AnnualizedReturn for OutOfSample Run:');
+disp(AnnualizedReturn);
+disp('Max Drawdown for OutOfSample Run:');
+disp(MaxDD);     
+     
+
+
+
 
 guidata(hObject, handles);
 

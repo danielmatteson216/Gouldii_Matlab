@@ -1,4 +1,9 @@
-function TnP = Gouldii_TradesPerformanceFunction_v2(Commission,initialportfolio,Serial_enddate,Serial_startdate,VIX, sigw1,sigw2,ticker1,ticker2, SERIAL_DATE_DATA, TargetWeightVX1_S30, TargetWeightVX2_S30, TradeDate, ExpDates, curve_tickers, TradeDate_NumFormat,T1,T2,StopLoss,TradeDay,CONTANGO, CONTANGO30, ROLL_YIELD,VX1_close,VX1_open,VX1_high,VX1_low,VX2_close,VX2_open,VX2_high,VX2_low,VX1_settle,VX2_settle,cashonweekendsflag)
+function TnP = Gouldii_TradesPerformanceFunction_v2(Commission,initialportfolio,Serial_enddate,Serial_startdate,VIX, sigw1,sigw2,...
+    ticker1,ticker2, SERIAL_DATE_DATA, TargetWeightVX1_S30, TargetWeightVX2_S30, TradeDate, ExpDates, curve_tickers, TradeDate_NumFormat,...
+    T1,T2,StopLoss,TradeDay,CONTANGO, CONTANGO30, ROLL_YIELD,...
+    VX1_close,VX1_open,VX1_high,VX1_low,...
+    VX2_close,VX2_open,VX2_high,VX2_low,...
+    VX1_settle,VX2_settle,cashonweekendsflag)
 
 %determine number of rows using the row indices for TRADING PERIOD
 nr = Serial_enddate - Serial_startdate+1; 
@@ -254,7 +259,7 @@ nexttradeday = weekday(busdate(SERIAL_DATE_DATA(i),1));     %%%%%%%%%%%%%%%%%%%%
             
             
             
-            
+            StopLoss_Haircut = 0.02;
             
             %calculate the netliq bottom for the stop loss calculation
             if StopLoss > 0
@@ -262,12 +267,12 @@ nexttradeday = weekday(busdate(SERIAL_DATE_DATA(i),1));     %%%%%%%%%%%%%%%%%%%%
                 if (sigw1(i-1,1)+ sigw2(i-1,1) < 0) || (frisig_vx1(i-1,1) + frisig_vx2(i-1,1) < 0)
                     NetliqBottom(i,1) = (PortfolioVX1ContractsPre(i,1) * VX1_high(i,1) * 1000) + (PortfolioVX2ContractsPre(i,1) * VX2_high(i,1) * 1000) + PortfolioCashPre(i,1);
 
-                elseif (sigw1(i-1,1)+ sigw2(i-1,1) < 0) || (frisig_vx1(i-1,1) + frisig_vx2(i-1,1) > 0)   
+                elseif (sigw1(i-1,1)+ sigw2(i-1,1) > 0) || (frisig_vx1(i-1,1) + frisig_vx2(i-1,1) > 0)   
                     NetliqBottom(i,1) = (PortfolioVX1ContractsPre(i,1) * VX1_low(i,1) * 1000) + (PortfolioVX2ContractsPre(i,1) * VX2_low(i,1) * 1000) + PortfolioCashPre(i,1);   
                 else
                     NetliqBottom(i,1) = PortfolioNetLiqPost(i-1,1);
                 end
-            Stoplosscheck(i,1) =  PortfolioNetLiqPost(i-1,1) * (1 - StopLoss) ;  
+            Stoplosscheck(i,1) =  PortfolioNetLiqPost(i-1,1) * (1 - (StopLoss + StopLoss_Haircut)) ;  
             end
             
             

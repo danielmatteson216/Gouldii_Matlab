@@ -3,13 +3,15 @@
 
 % ----------------------------------------------------------------------
 %load('C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\Gouldii_Strategy_Prime_v2\WFA\20070820_20181102_WFAfinaloutput_20181109_001859.mat');
-load('C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\buynhold.mat');
+%load('C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\buynhold.mat');
 
-%[NetLiqR, NetLiqC] = size(WFAfinaloutput);
-[NetLiqR, NetLiqC] = size(finaloutput);
+function Gouldii_DailyPerformance(WFAfinaloutput, histocolor,histotrans,TradeDate,initialportfolio,SelectedStrategy_temp)
 
-%NetLiqT = WFAfinaloutput(:,30);
-NetLiqT = finaloutput(:,30);
+[NetLiqR, NetLiqC] = size(WFAfinaloutput);
+%[NetLiqR, NetLiqC] = size(finaloutput);
+
+NetLiqT = WFAfinaloutput(:,30);
+%NetLiqT = finaloutput(:,30);
 % ----------------------------------------------------------------------
 NetLiqT = NetLiqT(3:end);
 
@@ -20,7 +22,7 @@ Dates = cellstr(Dates);
 
 TimeSeriesObject = fints(Dates, NetLiqT);
 idate = {'17-Aug-2007'};
-initial = fints(idate,1000000);
+initial = fints(idate,initialportfolio);
 
 DailyData = todaily(TimeSeriesObject);
 DailyData = merge(initial,DailyData);
@@ -28,22 +30,52 @@ DailyData = merge(initial,DailyData);
 DailyReturns  = tick2ret(DailyData);
 
 DailyReturnsData = fts2mat(DailyReturns);
+DailyReturnsDataNoZeros = DailyReturnsData(DailyReturnsData~=0);
 xmin = min(DailyReturnsData);
 xmin = round(xmin,1);
 xmax = max(DailyReturnsData);
 xmax= round(xmax,1);
-xtic = [xmin:.01:xmax];
-zoom = [-.01:.001:.01];
-zoomneg = [-.1:.001:0];
-zoompos = [0:.001:0.1];
+%xtic = [xmin:.01:xmax];
+xtic = [-1:.01:1];
 
-random1 = rand(1,3);
-random2 = rand(1,3);
-random3 = rand(1,3);
 
-figure(1000)
+
+figure(31)
 HistoGraphps = histogram(DailyReturnsData,xtic);
-HistoGraphps(1).FaceColor = 'b';
+%HistoGraphps = histogram(DailyReturnsData,201);
+xlim([-1 1]);
+%xtickformat('percentage');
+%HistoGraphps(1).FaceColor = 'b';
+HistoGraphps(1).FaceColor = histocolor;
+HistoGraphps(1).FaceAlpha = histotrans;
+set(gca,'Xtick',-1:.1:1)
+%set(gca,'XtickLabel',time(1:3:end))
+hold on
+
+figure(41)
+HistoGraphps = histogram(DailyReturnsDataNoZeros,xtic);
+%HistoGraphps = histogram(DailyReturnsData,201);
+xlim([-1 0.5]);
+%xtickformat('percentage');
+%HistoGraphps(1).FaceColor = 'b';
+HistoGraphps(1).FaceColor = histocolor;
+HistoGraphps(1).FaceAlpha = histotrans;
+set(gca,'Xtick',-1:.1:1)
+set(gca,'XMinorTick','on','YMinorTick','on')
+
+
+% Convert y-axis values to percentage values by multiplication
+     xaxispercent=[cellstr(num2str(get(gca,'xtick')'*100))]; 
+% Create a vector of '%' signs
+     pct = char(ones(size(xaxispercent,1),1)*'%'); 
+% Append the '%' signs after the percentage values
+     new_xticks = [char(xaxispercent),pct];
+% 'Reflect the changes on the plot
+     set(gca,'xticklabel',new_xticks)
+
+
+%xaxislabel
+
 hold on
 %{
 figure(2001)
@@ -74,6 +106,9 @@ results(:,1) = str2num(datestr(datenum(results(:,1)),'YYYYmmDD'));
 xlswrite('DailyReturnsData',DailyReturnsData);
 xlswrite('DailyReturnsDataResults',results);
 %}
+results = fts2mat(DailyReturns, 1);
+results(:,1) = str2num(datestr(datenum(results(:,1)),'YYYYmmDD'));
+xlswrite('DailyReturnsData',DailyReturnsData);
+xlswrite('DailyReturnsDataResults',results);
 
-
-%end
+end

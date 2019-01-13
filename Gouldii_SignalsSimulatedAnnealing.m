@@ -1,166 +1,146 @@
-clear; clc; close all
-format long
-% NOTE: We need to track the number of test cases it takes to get a larger
-% solution value. As that number increases,the likelyhood of finding a
-% better solution value decreases. As this likelyhood decreases past some
-% threshold (this could be thought of as the some number of test guesses),
-% we should accept the last solution that was found.
+function [TotalLinearOpt,sigprevious,OptParameterA,OptParameterB,OptParameterC,OptParameterD,OptParameterE,OptParameterF,OptMaxDD,OptNetProfit,OptSharpeRatio,OptAnnualizedReturn,isfirstday,cashonweekendsflag,output,SharpeRatioSA,AnnualizedReturn_MaxDD]...
+                                                                    = Gouldii_SignalsSimulatedAnnealing(SelectedStrategy,Serial_startdate_actual,Serial_enddate_actual,CONTANGO,CONTANGO30,...
+                                                                                                          ParameterA,ParameterB,ParameterC,ParameterD,ParameterE,ParameterF,...
+                                                                                                          TargetWeightVX1_S30,TargetWeightVX2_S30,TargetWeightVX1_S45,TargetWeightVX2_S45,curve_tickers,gouldiiVCO,...
+                                                                                                          VIX_VIX3M,VIX_VIX6M,VIX9D_VIX,VIX_ma50d,VIX9D_ma50d,VIX9D_VIX_ma50d,VIX_ma20d,VIX_ma200d,VIX,isfirstday,sigprevious,isWFA,isMA,...
+                                                                                                          Commission,initialportfolio,SERIAL_DATE_DATA,...
+                                                                                                          TradeDate, ExpDates, ...
+                                                                                                          TradeDate_NumFormat,T1,T2,StopLoss,TradeDay, ROLL_YIELD,...
+                                                                                                          VX1_close,VX1_open,VX1_high,VX1_low,VX2_close,VX2_open,VX2_high,VX2_low,VX1_settle,VX2_settle)
+                                                                                                      
+addpath('Strategies');
+%clear;clc;
 
-% how do we ensure we dont test the same value twice... or even values
-% within some tolerance of previous values? (does this matter? this seems
-% wrong) we dont want to spend time checking previous values every loop
-% tho.
-%%
-counter = 0;
-n = 20; %set total loop count
-T = 1.0;
-alpha = 0.85;
+%set static param values  (some of these should be pulled from the GUI!! - may/will have WFA implications)
+ParameterE = 0;
+ParameterF = 0;
+y_CONTANGO = 0;
+y_CONTANGO30 = 0;
 
-Tmin = 0.01;
-startdate_string = '08/21/2006';
-enddate_string = '11/02/2018';
+y_sig = 0;  % this needs to be pulled from the output of the previous run.
+Commission = 20;
+initialportfolio = 1000000;
+StopLoss = .10;
+cashonweekendsflag = 1;
 
-% function definitions
-func                         = @(ParameterA, ParameterB, ParameterC, ParameterD) Math693A_finalproject( ParameterA, ParameterB, ParameterC, ParameterD, startdate_string,enddate_string);
-vf                           = @(x)              func(x(1,:),x(2,:),x(3,:),x(4,:));           %FUNCTION
+ % GET DATA HISTORICAL DATA - Entire database is loaded in the following line   --- THIS TAKES ALOT OF TIME!!! WE SHOULD DO THIS ONCE AND PASS THE INDICATORS NEEDED
+%------------------------------------------------------ 
+%load('db_historicaldata.mat');
+%load('db_tradedate.mat');  
 
-lb_A = 0.;
-rb_A = 0.25;
-
-lb_B = 0;
-rb_B = 0.25;
-
-lb_C = -0.15;
-rb_C = 0;
-
-lb_D = -0.15;
-rb_D = 0;
-
-spreadA = (rb_A - lb_A);
-spreadB = (rb_B - lb_B);
-spreadC = (rb_C - lb_C);
-spreadD = (rb_D - lb_D);
-
-%initA = lb_A + ((spreadA)/(1/T)).*randn(1) ;
-%initB = lb_B + ((spreadB)/(1/T)).*randn(1) ;
-%initC = lb_C + ((spreadC)/(1/T)).*randn(1) ;
-%initD = lb_D + ((spreadD)/(1/T)).*randn(1) ;  wtf?!?!
+% DEAL WITH DATES
+%Serial_startdate_actual = datenum(startdate_string,'mm/dd/yyyy');
+%Serial_enddate_actual = datenum(enddate_string,'mm/dd/yyyy');
+Serial_startdate = datefind(Serial_startdate_actual,SERIAL_DATE_DATA);
+Serial_enddate = datefind(Serial_enddate_actual,SERIAL_DATE_DATA);
+TradeDateSpan = TradeDate_NumFormat(Serial_startdate:Serial_enddate);
+TradeDateActualSpan = TradeDate(Serial_startdate:Serial_enddate);
 
 
-% delta =   mean    +      std * randn       % normally distributed variable around mean with standard deviation
-%initA = (lb_A + spreadA/2) + ((spreadA)/(1/T))*randn() ;
-%initB = (lb_B + spreadB/2) + ((spreadB)/(1/T))*randn() ;
-%initC = (lb_C + spreadC/2) + ((spreadC)/(1/T))*randn() ;
-%initD = (lb_D + spreadD/2) + ((spreadD)/(1/T))*randn() ;  
-
-initA = (lb_A + spreadA/2);
-initB = (lb_B + spreadB/2);
-initC = (lb_C + spreadC/2);
-initD = (lb_D + spreadD/2);  
+%--------------------------------------------------------
+% SELECT STRATEGY TO RUN    -----------------------------
+% -------------------------------------------------------
+SelectedStrategy_input = SelectedStrategy(1:end-2);
+% -------------------------------------------------------
 
 
-InitialParameterA = initA
-InitialParameterB = initB
-InitialParameterC = initC
-InitialParameterD = initD
-%%
-NewMaxParameterA            = zeros(n,1);
-NewMaxParameterB            = zeros(n,1);
-NewMaxParameterC            = zeros(n,1);
-NewMaxParameterD            = zeros(n,1);
-NewMaxObjectiveFunction     = zeros(n,1);
-NewMaxSharpeRatio           = zeros(n,1);
-
-xk = [  InitialParameterA
-        InitialParameterB
-        InitialParameterC
-        InitialParameterD  ]
-
-    %neighborhood calcs
-
-
-[initsharpe,initOF] = vf(xk);
-
-
-%---------------------------------------------------------------------
-        counter = 1; 
-  
-   while T > Tmin
-            
-
-        i = 1;
-        % WHILE LOOP - used to determine if our position is a minimum
-        %while randsharpe <= initsharpe                                                                 
-        while i <= n  
-            
-            deltaA = ((spreadA)/(1/T)).*randn(1); 
-            deltaB = ((spreadB)/(1/T)).*randn(1); 
-            deltaC = ((spreadC)/(1/T)).*randn(1); 
-            deltaD = ((spreadD)/(1/T)).*randn(1); 
-
-            xkrand = [deltaA+xk(1) ; deltaB+xk(2) ; deltaC+xk(3) ; deltaD+xk(4) ];
-            
-            % add if statements here
-            
-                if xkrand(1) > rb_A || xkrand(1) < lb_A
-                    xkrand(1) = xk(1); 
-                end 
-                
-                if xkrand(2) > rb_B ||  xkrand(2) < lb_B
-                    xkrand(2) = xk(2); 
-                end 
-                
-                if xkrand(3) > rb_C || xkrand(3) < lb_C
-                    xkrand(3) = xk(3); 
-                end 
-                
-                if xkrand(4) > rb_D || xkrand(4) < lb_D
-                    xkrand(4) = xk(4); 
-                end             
-                
-            [randsharpe,randOF] = vf(xkrand);
-            
-            if randOF > initOF
-               BestOF(i,:) = randOF;
-               BestXK(i,:) = xkrand;
-            else
-               BestOF(i,:) = initOF;
-               BestXK(i,:) = xk;
-            end    
-            
-           OFdiff = randOF-initOF; 
-            %calculate the acceptance probability here
-            a = (exp(OFdiff/T))
-            
-                if OFdiff >= 0
-                     xk = xkrand;
-                    initOF = randOF; 
-                    
-                elseif OFdiff < 0
-                    
-                    if a > rand(1)
-                    xk = xkrand;
-                    initOF = randOF;   
-                    end
-                    
-                end
-
-            randomobjectivefunctionvalue = randOF;
-            randomsharperatio = randsharpe;
-
-            %initOF = randOF;
-            
-            i = i + 1;
-        end
+  %=======================================================================
+  %   ===============        CALL STRATEGY       ===================
+  %=======================================================================
+try
+                [sigprevious,sigw1,sigw2,ticker1,ticker2] = feval(SelectedStrategy_input,Serial_startdate,Serial_enddate,CONTANGO,CONTANGO30,y_CONTANGO,y_CONTANGO30,y_sig,...
+                                                                  ParameterA,ParameterB,ParameterC,ParameterD,ParameterE,ParameterF,...
+                                                                  TargetWeightVX1_S30,TargetWeightVX2_S30,TargetWeightVX1_S45,TargetWeightVX2_S45,curve_tickers,gouldiiVCO,...
+                                                                  VIX_VIX3M,VIX_VIX6M,VIX9D_VIX,VIX_ma50d,VIX9D_ma50d,VIX9D_VIX_ma50d,VIX_ma20d,VIX_ma200d,VIX);
+               
+catch
+    disp('Error occurs in LO code while trying to run strategy'); %debugging tool
+end
+  %=======================================================================
+  % ============        CALL TRADES AND PERFORMANCE       ============
+  %=======================================================================    
+try
+    finaloutput = Gouldii_TradesPerformanceFunction_v2(Commission,initialportfolio,Serial_enddate,Serial_startdate,VIX, sigw1,sigw2,ticker1,ticker2, SERIAL_DATE_DATA,...
+                                                       TargetWeightVX1_S30, TargetWeightVX2_S30, TradeDate, ExpDates, curve_tickers,...
+                                                       TradeDate_NumFormat,T1,T2,StopLoss,TradeDay,CONTANGO, CONTANGO30, ROLL_YIELD,...
+                                                       VX1_close,VX1_open,VX1_high,VX1_low,VX2_close,VX2_open,VX2_high,VX2_low,VX1_settle,VX2_settle,cashonweekendsflag);
     
-    OverallBestOF(counter,:) = BestOF(end,:);
-    OverallBestXK(counter,:) = BestXK(end,:);
-    T = alpha*T;
-    newT = T
-    
-    counter = counter + 1;
-   end
+catch
+disp('Error occurs in LO code while trying to run T&P code');  %debugging tool
+end
 
-    
+% CREATE OUTPUT
+NetLiqTotal(:,1) = finaloutput(3:end,30);
+SharpeRatio(1,1) = finaloutput(end,47);
+SharpeRatioSA = cell2mat(SharpeRatio);
+
+CummROR(1,1) = cell2mat(finaloutput(end,46));       
+NetProfit(1,1) = cell2mat(NetLiqTotal(end,1)) - cell2mat(NetLiqTotal(1,1));
+
+AnnualizedReturn = (((1+CummROR))^(365/length(NetLiqTotal)))-1;
+                
+% MaxDD calculations
+[MaxDD,MaxDDindex] = maxdrawdown(cell2mat(NetLiqTotal(:,1))); 
+
+AnnualizedReturn_MaxDD = AnnualizedReturn/MaxDD;
+
+Objective_function = AnnualizedReturn_MaxDD
+%Objective_function = funcval
+
+
+% -----------------  everything below this line is not needed -------------
+
+
+SharpeRatio
+MaxDrawdown = MaxDD;
+DrawdownIndices = MaxDDindex';
+startindexDD = DrawdownIndices(1,1);
+endindexDD = DrawdownIndices(1,2);
+MaxDDstartdate = TradeDateSpan(startindexDD);  
+MaxDDenddate = TradeDateSpan(endindexDD);
+MaxDrawdownDates = [MaxDDstartdate MaxDDenddate];
+MaxDrawdownTotal = [MaxDD MaxDDstartdate MaxDDenddate];
+
+%{
+
+%GRAPHS AND EXCEL OUTPUT
+stratpath = 'C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\';
+strategypath = strcat(stratpath, SelectedStrategy_temp, '\');
+strategypathResults = strcat(strategypath,'Results\');
+
+now = datetime('now','Format','yyyyMMdd_HHmmss');
+now = datestr(now,'yyyymmdd_HHMMss');
+sdate = datestr(Serial_startdate_actual,'yyyymmdd');
+edate = datestr(Serial_enddate_actual,'yyyymmdd');
+
+strategypath_output = strcat(strategypathResults,sdate,'_',edate,'_');
+strategypath_output = strcat(strategypath_output,'SingleRun-mathproject-OutputArray_',now,'.xlsx'); 
+
+strategypath_maxdd = strcat(strategypathResults,sdate,'_',edate,'_');
+strategypath_maxdd = strcat(strategypath_maxdd,'SingleRun-mathproject-MaxDrawdowntotal_',now,'.xlsx');
+
+            xlswrite(strategypath_output,finaloutput);                     
+            xlswrite(strategypath_maxdd,MaxDrawdownTotal); 
+
+            Netliqtotalnum = cell2mat(NetLiqTotal(:,1));
+            
+figure(1)
+semilogy(TradeDateSpan,Netliqtotalnum)
+title('NETLIQ TOTAL VS TRADEDATE')
+xlabel('TradeDate');
+ylabel('Dollars');
+hold on
+
+figure(2)
+semilogy(TradeDateSpan,log10(Netliqtotalnum))
+title('Log(NETLIQ TOTAL) VS TRADEDATE')
+xlabel('TradeDate');
+ylabel('Log(Dollars)');
+hold on
+%}
+
+end
+
+
 
 

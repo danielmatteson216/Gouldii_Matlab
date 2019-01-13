@@ -82,6 +82,12 @@ xk = [  InitialParameterA
 
 [initsharpe,initOF] = vf(xk);
 
+xkrandmatrixfull(1,1) = xk(1);
+xkrandmatrixfull(1,2) = xk(2);
+xkrandmatrixfull(1,3) = xk(3);
+xkrandmatrixfull(1,4) = xk(4);
+xkrandmatrixfull(1,5) = initsharpe;
+xkrandmatrixfull(1,6) = initOF;
 
 %---------------------------------------------------------------------
         counter = 1; 
@@ -100,6 +106,9 @@ xk = [  InitialParameterA
             deltaD = ((spreadD)/(1/T)).*randn(1); 
 
             xkrand = [deltaA+xk(1) ; deltaB+xk(2) ; deltaC+xk(3) ; deltaD+xk(4) ];
+            %xkrandvec = xkrand';
+
+            
             
             % add if statements here
             
@@ -118,8 +127,16 @@ xk = [  InitialParameterA
                 if xkrand(4) > rb_D || xkrand(4) < lb_D
                     xkrand(4) = xk(4); 
                 end             
-                
+
+            xkrandmatrix(i,1) = xkrand(1);
+            xkrandmatrix(i,2) = xkrand(2);            
+            xkrandmatrix(i,3) = xkrand(3);
+            xkrandmatrix(i,4) = xkrand(4);
+            
             [randsharpe,randOF] = vf(xkrand);
+            
+            xkrandmatrix(i,5) = randsharpe;
+            xkrandmatrix(i,6) = randOF;            
             
             if randsharpe > initsharpe
                BestOF(i,:) = randsharpe;
@@ -169,7 +186,8 @@ xk = [  InitialParameterA
             
             i = i + 1;
         end
-    
+    xkrandmatrixfull = vertcat(xkrandmatrixfull, xkrandmatrix);
+        
     OverallBestOF(counter,:) = BestOF(end,:);
     OverallBestXK(counter,:) = BestXK(end,:);
     

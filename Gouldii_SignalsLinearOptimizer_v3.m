@@ -1,3 +1,4 @@
+
 %                                    LINEAR OPTIMIZATION CODE
 %
 function [TotalLinearOpt,sigprevious,OptParameterA,OptParameterB,OptParameterC,OptParameterD,OptParameterE,OptParameterF,OptMaxDD,OptNetProfit,OptSharpeRatio,OptAnnualizedReturn,isfirstday,cashonweekendsflag,output]...
@@ -15,7 +16,7 @@ load('db_historicaldata.mat');
 load('db_tradedate.mat');
 
 % print all in sample wfa runs in excel ("1" = print all)
-wfalongexcel = 0;
+wfalongexcel = 1;
 
             assignin('base','sigprevious',sigprevious);
             assignin('base','VIX_VIX3M',VIX_VIX3M);
@@ -449,11 +450,11 @@ end
  
     %this is likely not needed. it was a debugging tool. 
     
-%    if NetLiqTotalempty == 0
-%    disp('Net Liq is negative');
-%    elseif NetLiqTotalempty == 1
-%    disp('Net Liq is positive');
-%    end
+    %if NetLiqTotalempty == 0
+    %disp('Net Liq is negative');
+    %elseif NetLiqTotalempty == 1
+    %disp('Net Liq is positive');
+    %end
  
 
 

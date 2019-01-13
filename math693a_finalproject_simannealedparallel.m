@@ -1,13 +1,11 @@
 clear; clc; close all
 format long
-%parpool('local',[4,16])
-
 
 %set date range
-startdate_string = '08/21/2006';
-enddate_string = '11/02/2018';
+startdate_string = '01/02/2018';
+enddate_string = '12/31/2018';
 
-parfor cnt = 1:6
+parfor cnt = 1:10
 
 %User defined variables
 n = 40; %set total loop count
@@ -113,9 +111,9 @@ i = 0; %loop semaphore variable
             [randsharpe,randOF] = vf(xkrand);
          
             %determines which objective function we are optimizing
-            % OFdiff = randsharpe-initsharpe;         OFtype = 'Sharpe';    
-             OFdiff = randOF-initOF;               
-             OFtype = 'MaxAnnualizedReturn/MaxDD';                
+             OFdiff = randsharpe-initsharpe;         OFtype = 'Sharpe';    
+            % OFdiff = randOF-initOF;               
+            % OFtype = 'MaxAnnualizedReturn/MaxDD';                
 
             %calculate the acceptance probability here
             a = (exp(OFdiff/T))

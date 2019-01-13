@@ -53,7 +53,7 @@ curs10 = exec(conn, ['SELECT 	*'...
 curs11 = exec(conn, ['SELECT 	*'...
     ' FROM 	gouldiidb.prices '...
     ' WHERE 	prices.ticker = ''spxt'''...
-    ' ORDER BY pDate DESC']);
+    ' ORDER BY pDate DESC']);5
 
 curs = fetch(curs);
 close(curs);
@@ -70,7 +70,7 @@ close(curs4);
 curs5 = fetch(curs5);
 close(curs5);
 
-curs6 = fetch(curs6);
+curs6 = fetch(curs6);8
 close(curs6);
 
 curs7 = fetch(curs7);

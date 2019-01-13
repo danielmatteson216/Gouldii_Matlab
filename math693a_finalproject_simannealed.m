@@ -29,11 +29,6 @@ rb1 = 0;
 lb2 = rb1;
 rb2 = 0.30;
 
-%lb1 = -1;
-%rb1 = 1;
-%lb2 = -1;
-%rb2 = 1;
-
 spread1 = (rb1 - lb1);
 spread2 = (rb2 - lb2);
 

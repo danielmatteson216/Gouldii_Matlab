@@ -1,7 +1,7 @@
 
-clc;clear;close all;
+%clc;clear;close all;
 
-load('C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\Gouldii_Strategy_Prime_v2\WFA\20090819_20181102_WFAfinaloutput_20181108_001040.mat');
+%load('C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\Gouldii_Strategy_Prime_v2\WFA\20070820_20181231_WFAfinaloutput_20190103_115646.mat');
 
 [NetLiqR, NetLiqC] = size(WFAfinaloutput);
 
@@ -34,10 +34,11 @@ xmax = max(MonthlyReturnsData);
 xmax= round(xmax,1);
 xtic = [xmin:.01:xmax];
 
-figure(32)
-HistoGraphps = histogram(MonthlyReturnsData,xtic);
-results = fts2mat(MonthlyReturns, 1);
+%figure(32)
+%HistoGraphps = histogram(MonthlyReturnsData,xtic);
+%hold on
 
+results = fts2mat(MonthlyReturns, 1);
 results(:,1) = str2num(datestr(datenum(results(:,1)),'YYYYmmDD'));
 
 xlswrite('MonthlyReturnsData',MonthlyReturnsData);

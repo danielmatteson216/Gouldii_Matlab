@@ -2,7 +2,7 @@ function [funcval,AnnualizedReturn_MaxDD] = Math693A_finalproject(ParameterA,Par
 addpath('Strategies');
 %clear;clc;
 
-%set static param values
+%set static param values  (some of these should be pulled from the GUI!! - may/will have WFA implications)
 ParameterE = 0;
 ParameterF = 0;
 y_sig = 0;
@@ -75,6 +75,7 @@ AnnualizedReturn = (((1+CummROR))^(365/length(NetLiqTotal)))-1;
 AnnualizedReturn_MaxDD = AnnualizedReturn/MaxDD;
 
 Objective_function = AnnualizedReturn_MaxDD
+%Objective_function = funcval
 
 
 % -----------------  everything below this line is not needed -------------
