@@ -2218,6 +2218,10 @@ function Run_LO_Callback(hObject, eventdata, handles)
 % hObject    handle to Run_LO (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+%Timer on
+RunStartTimer = datestr(now)
+
 format short
 format compact
 profile on
@@ -2748,7 +2752,7 @@ WFAoptparamstitles = {'Iteration #';'OptimizedStartDate';'OptimizedEndDate';'Opt
                                     %{ 
                                    
                                     [TotalLinearOpt,sigprevious,OptParameterA,OptParameterB,OptParameterC,OptParameterD,OptParameterE,OptParameterF,OptMaxDD,OptNetProfit,OptSharpeRatio,OptAnnualizedReturn,isfirstday,cashonweekendsflag,output,SharpeRatioSA,AnnualizedReturn_MaxDD]...
-                                                                    = Gouldii_SignalsSimulatedAnnealing(SelectedStrategy,Serial_startdate_actual,Serial_enddate_actual,CONTANGO,CONTANGO30,...
+                                                                    = Gouldii_SA(SelectedStrategy,Serial_startdate_actual,Serial_enddate_actual,CONTANGO,CONTANGO30,...
                                                                                                           ParameterA,ParameterB,ParameterC,ParameterD,ParameterE,ParameterF,...
                                                                                                           TargetWeightVX1_S30,TargetWeightVX2_S30,TargetWeightVX1_S45,TargetWeightVX2_S45,curve_tickers,gouldiiVCO,...
                                                                                                           VIX_VIX3M,VIX_VIX6M,VIX9D_VIX,VIX_ma50d,VIX9D_ma50d,VIX9D_VIX_ma50d,VIX_ma20d,VIX_ma200d,VIX,isfirstday,sigprevious,isWFA,isMA,...
@@ -3102,7 +3106,7 @@ disp('WFA complete');
  xlswrite('C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\PreviousWFArun.xlsx',WFADateMatrix);
 
  save(WFAstrategypathlongoutput,'WFAoptoutput');
- save(WFAstrategypathlongoutput,'WFAdaterange','WFADateMatrix');  
+ %save(WFAstrategypathlongoutput,'WFAdaterange','WFADateMatrix');  
 % save(WFAstrategypathfinaloutput,'WFAfinaloutput','TradeDate');  
  save(WFAstrategypathfinaloutput,'WFAfinaloutput','TradeDate','Commission','initialportfolio','StopLoss');  
  catch
@@ -3210,25 +3214,29 @@ disp(LOMaxDD);
 
                                     
                                     
-                                    
-                                    
-                                    
-                                    
-% STUPID MA shit
-
-% ---------------------------------------- MOVING AVERAGES --------------------------------------
-if isMA == 1
-    
 SelectedStrategy_temp = SelectedStrategy(1:end-2);
 stratpath = 'C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Reference\';
 strategypath = strcat(stratpath, SelectedStrategy_temp, '\');
 strategypathOptParams = strcat(strategypath,'OptParams\');
+strategypathGraphs = strcat(strategypath,'Graphs\');
 
 now = datetime('now','Format','yyyyMMdd_HHmmss');
 now = datestr(now,'yyyymmdd_HHMMss');
 sdate = datestr(Serial_startdate_actual,'yyyymmdd');
-edate = datestr(Serial_enddate_actual,'yyyymmdd');
+edate = datestr(Serial_enddate_actual,'yyyymmdd');                                    
 
+    Serial_startdate = datefind(Serial_startdate_actual,SERIAL_DATE_DATA);
+    Serial_enddate = datefind(Serial_enddate_actual,SERIAL_DATE_DATA);   
+    TradeDate = TradeDate(Serial_startdate:Serial_enddate, :); 
+
+strategypath_graphs = strcat(strategypathGraphs,sdate,'_',edate,'_');
+strategypath_graphs = strcat(strategypath_graphs,'LOoutput_',now,'.mat');
+save(strategypath_graphs,'LOoutput','TradeDate','Commission','initialportfolio','StopLoss');                                      
+                                    
+% STUPID MA shit
+
+% ---------------------------------------- MOVING AVERAGES --------------------------------------
+if isMA == 1    
 strategypath_optparams = strcat(strategypathOptParams,sdate,'_',edate,'_');
 strategypath_optparams = strcat(strategypath_optparams,'OptParamsMovingAverages_',now,'.xlsx');
 
@@ -3349,9 +3357,9 @@ disp(BuyandholdMaxDD);
                                     end
 
     %datefind again...
-    Serial_startdate = datefind(Serial_startdate_actual,SERIAL_DATE_DATA);
-    Serial_enddate = datefind(Serial_enddate_actual,SERIAL_DATE_DATA);   
-           TradeDate = TradeDate(Serial_startdate:Serial_enddate, :);  
+  %  Serial_startdate = datefind(Serial_startdate_actual,SERIAL_DATE_DATA);
+  %  Serial_enddate = datefind(Serial_enddate_actual,SERIAL_DATE_DATA);   
+  %         TradeDate = TradeDate(Serial_startdate:Serial_enddate, :);  
            
 % ---------------------------------------- MOVING AVERAGES --------------------------------------           
  if isMA == 1   
@@ -3382,8 +3390,11 @@ disp(BuyandholdMaxDD);
                                     pause(3)
                                     set(handles.status_GUI,'String',status_start);
                                     guidata(hObject, handles);
-xlswrite('LinearOptResults.xlsx',TotalLinearOpt);                                    
+xlswrite('LinearOptResults.xlsx',TotalLinearOpt);    
+
+
 % end of run    
+
 
 end
 profile off
@@ -3391,7 +3402,8 @@ profile viewer
 
 
 
-
+%Timer off
+RunStopTimer = datestr(now)
 
 % =========================================================================================================================================================================================================                                                      ======================
 % =========================================================================================================================================================================================================                   RUN BUTTON                         ======================

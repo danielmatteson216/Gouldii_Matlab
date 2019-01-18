@@ -376,6 +376,13 @@ nexttradeday = weekday(busdate(SERIAL_DATE_DATA(i),1));     %%%%%%%%%%%%%%%%%%%%
            PortfolioMktValPost(i,1) = PositionVX1Post(i,1) + PositionVX2Post(i,1);
            PortfolioNetLiqPost(i,1) = PortfolioCash(i,1) + PortfolioMktValPost(i,1);
            
+                if i < 253
+                    PortfolioMovingReturns(i,1) = 0;
+                else
+                    PortfolioMovingReturns(i,1) = ((PortfolioNetLiqPost(i,1) / PortfolioNetLiqPost(i-252,1)) - 1);
+                end
+           
+           
            ExposureVX1Post(i,1) = (PositionVX1Post(i,1) / PortfolioNetLiqPost(i,1));
            ExposureVX2Post(i,1) = (PositionVX2Post(i,1) / PortfolioNetLiqPost(i,1));
         
@@ -384,7 +391,7 @@ nexttradeday = weekday(busdate(SERIAL_DATE_DATA(i),1));     %%%%%%%%%%%%%%%%%%%%
            DailyROR(i,1) = DailyPL(i,1) / PortfolioNetLiqPost(i-1,1); 
            CummPL(i,1) = sum(DailyPL);
            CummROR(i,1) = CummPL(i,1) / PortfolioNetLiqPost(1,1);
-           CummSharpeRatio(i,1) = (mean(DailyROR) / std(DailyROR)) * sqrt(252);
+           CummSharpeRatio(i,1) = (mean(DailyROR) / std(DailyROR)) * sqrt(252);             % trading day set to 252
            
         end
  
@@ -408,7 +415,7 @@ PortfolioLabels = {'TradeDate','TradeDay','T1','T2','VX1OpenPrice','VX1LowPrice'
                    'PositionVX1Post','PortfolioVX1ContractsPre', 'PortfolioVX1ContractsPost', 'PositionVX2Pre', 'PositionVX2Post','PortfolioVX2ContractsPre', 'PortfolioVX2ContractsPost', 'ExposureVX1Pre', 'ExposureVX1Post', 'ExposureVX2Pre', ...
                    'ExposureVX2Post', 'DailyPL', 'DailyROR', 'CummPL', 'CummROR','CummSharpeRatio', ...
                    'TradeVX1TargetMonday','TradeVX2TargetMonday','TradeVX1ActualMonday', ...
-                   'TradeVX2ActualMonday','VIX','CONTANGO','CONTANGO30','ROLL_YIELD'};
+                   'TradeVX2ActualMonday','VIX','CONTANGO','CONTANGO30','ROLL_YIELD','PortfolioMovingReturns'};
 
 InitialValues = [0,0,0,0,0,0,0,0,0,0,...
                  0,0,0,0,0,0,0,0,0,0,0,...
@@ -416,7 +423,7 @@ InitialValues = [0,0,0,0,0,0,0,0,0,0,...
                  0,0,0,0,0,0,0,0,0,0, ...
                  0,0,0,0,0,0, ...
                  0,0,0, ...
-                 0,0,0,0,0];
+                 0,0,0,0,0,0];
                       
 TotalPortfolio = [TradeDate_NumFormat,TradeDay,T1,T2,VX1_open,VX1_low,VX1_close,VX1_high,VX2_open,VX2_low, ...
                   VX2_close,VX2_high, TargetWeightVX1_S30, TargetWeightVX2_S30, sigw1,sigw2, stoplossTrigger, TargetWeightVX1postsig, TargetWeightVX2postsig, TradeVX1Target, TradeVX1Contracts, ...
@@ -424,7 +431,7 @@ TotalPortfolio = [TradeDate_NumFormat,TradeDay,T1,T2,VX1_open,VX1_low,VX1_close,
                   PositionVX1Post, PortfolioVX1ContractsPre, PortfolioVX1ContractsPost, PositionVX2Pre, PositionVX2Post, PortfolioVX2ContractsPre, PortfolioVX2ContractsPost, ExposureVX1Pre, ExposureVX1Post, ExposureVX2Pre, ...
                   ExposureVX2Post, DailyPL, DailyROR, CummPL, CummROR,CummSharpeRatio, ...
                   TradeVX1TargetMonday,TradeVX2TargetMonday,TradeVX1ActualMonday, ...
-                  TradeVX2ActualMonday,VIX,CONTANGO,CONTANGO30,ROLL_YIELD];
+                  TradeVX2ActualMonday,VIX,CONTANGO,CONTANGO30,ROLL_YIELD,PortfolioMovingReturns];
             
               
 

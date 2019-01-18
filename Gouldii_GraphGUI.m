@@ -107,7 +107,9 @@ histocolor = 'b';
 histotrans = .7;
 
 SelectedStrategy_temp = RunStrategyFileName(19:end-20);
-
+if strcmp(SelectedStrategy_temp,'LOoutput')
+    WFAfinaloutput = LOoutput;
+end
 
      Gouldii_AnnualPerformance;
      Gouldii_MonthlyPerformance;
@@ -222,6 +224,8 @@ BuynHoldNetLiqTotaldoubles = cell2mat(BuynHoldNetLiqTotal);
 BuynHoldAnnualizedReturn = (((1+BuynHoldCummROR))^(365/length(BuynHoldNetLiqTotal)))-1;
 
 %TenPecentAnnual = (1.1^(1/250) ) %initialportfolio*0.10 + initialportfolio); %need to get the slope right for an annualized return of TenPercent
+MaxDD_StartDate = TradeDate(WFA_MaxDDindex(1));
+MaxDD_EndDate = TradeDate(WFA_MaxDDindex(2));
 
 %plot here!!
 figure(1)
@@ -347,7 +351,7 @@ Edate = strcat(Edatemonth,'/',Edateday,'/',Edateyear);
 
 SelectedRunStrategy = RunStrategyFileName(19:end-20);
 
-if strcmp(SelectedRunStrategy,'WFAfinaloutput');
+if strcmp(SelectedRunStrategy,'WFAfinaloutput') || strcmp(SelectedRunStrategy,'LOoutput');
 disp('You have selected the correct file name/type');
 else    
    msg = 'YOU HAVE NOT SELECTED THE CORRECT FILE TYPE';

@@ -21,7 +21,7 @@ Dates = cellstr(Dates);
 
 TimeSeriesObject = fints(Dates, NetLiqT);
 idate = {'31-Dec-2006'};
-initial = fints(idate,1000000);
+initial = fints(idate,initialportfolio);
 
 AnnualData = toannual(TimeSeriesObject);
 
