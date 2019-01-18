@@ -115,6 +115,8 @@ end
      Gouldii_MonthlyPerformance;
      Gouldii_DailyPerformance(WFAfinaloutput, histocolor,histotrans,TradeDate,initialportfolio,SelectedStrategy_temp);
      
+
+     
 % CODE GOES HERE
 SelectedStrategy        = 'Gouldii_Strategy_BuyandHold_v2.m';
 StrategyPath            = 'C:\Program Files\Matlab\MATLAB Production Server\R2015a\bin\Gouldii_root\Strategies\';
@@ -242,8 +244,21 @@ figure(1)
     hold on
     plot(TradeDate,BuynHoldNetLiqTotaldoubles);   
  hold off 
-     
- 
+
+try 
+PortfolioMovingReturns = WFAfinaloutput(:,56);
+PortfolioMovingReturns = PortfolioMovingReturns(3:end);
+catch
+disp('NO PORTFOLIO MOVING RETURNS FOUND IN THIS FILE');    
+end
+
+PortfolioMovingReturnsExists = exist('PortfolioMovingReturns');
+ if PortfolioMovingReturnsExists == 1
+     PortfolioMovingReturns = WFAfinaloutput(:,56);
+     PortfolioMovingReturns = PortfolioMovingReturns(3:end);
+  figure(3)
+  plot(TradeDate,cell2mat(PortfolioMovingReturns));
+ end
  
  
 NetLiqTotal = WFAfinaloutput(3:end,30);
@@ -325,9 +340,12 @@ function SelectRunFile_Callback(hObject, eventdata, handles)
 % hObject    handle to SelectRunFile (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
 StrategyPath = evalin('base','StrategyPath'); 
 SelectedStrategy = evalin('base','SelectedStrategy'); 
+
+
+
+
 SelectedStrategy = SelectedStrategy(1:end-2);
 StrategyPath = StrategyPath(1:end-11);
 RunStrategyPath = strcat(StrategyPath,'Reference\',SelectedStrategy);
@@ -359,5 +377,6 @@ else
 end
 set(handles.Static_StartDate,'String',Sdate);
 set(handles.Static_EndDate,'String',Edate);
+set(handles.Static_nameofstrategy,'String',SelectedRunStrategy);
 
 guidata(hObject, handles);
